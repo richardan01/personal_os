@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(python3:*)",
+      "Bash(python pm_os/cli.py discovery opportunity:*)",
+      "Bash(python pm_os/cli.py:*)",
+      "WebSearch",
+      "Bash(git rm:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

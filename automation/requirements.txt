@@ -1,0 +1,40 @@
+# Personal OS Automation - Python Dependencies
+
+# Core dependencies
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Slack integration
+slack-sdk==3.26.1
+slack-bolt==1.18.1
+
+# AI/LLM integration
+anthropic==0.18.1
+openai==1.12.0
+
+# Task management (choose based on your tools)
+jira==3.5.2
+notion-client==2.2.1
+asana==5.0.0
+
+# Calendar integration
+google-api-python-client==2.116.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.0
+
+# Utilities
+requests==2.31.0
+schedule==1.2.0
+pytz==2024.1
+python-dateutil==2.8.2
+
+# Data handling
+pandas==2.1.4
+pyyaml==6.0.1
+
+# Logging and monitoring
+loguru==0.7.2
+
+# Optional: Database for storing agent data
+sqlalchemy==2.0.25
