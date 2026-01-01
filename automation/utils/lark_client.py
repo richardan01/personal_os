@@ -331,6 +331,278 @@ class LarkClient:
             logger.error(f"Error getting Lark user info: {e}")
             return None
 
+    # ==================== Lark Base (Bitable) API Methods ====================
+
+    def list_base_tables(self, app_token: str) -> Optional[List[Dict]]:
+        """
+        List all tables in a Lark Base
+
+        Args:
+            app_token: The Base app token (from Base URL)
+
+        Returns:
+            List of table information or None if error
+        """
+        if not self.access_token:
+            logger.error("Lark client not initialized")
+            return None
+
+        self._refresh_token_if_needed()
+
+        url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{app_token}/tables"
+
+        headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
+
+        try:
+            response = requests.get(url, headers=headers)
+            result = response.json()
+
+            if result.get("code") == 0:
+                tables = result.get("data", {}).get("items", [])
+                logger.info(f"Found {len(tables)} tables in base {app_token}")
+                return tables
+            else:
+                logger.error(f"Error listing tables: {result}")
+                return None
+
+        except Exception as e:
+            logger.error(f"Error listing base tables: {e}")
+            return None
+
+    def get_base_records(
+        self,
+        app_token: str,
+        table_id: str,
+        page_size: int = 100,
+        page_token: Optional[str] = None,
+        view_id: Optional[str] = None,
+        filter: Optional[str] = None,
+    ) -> Optional[Dict]:
+        """
+        Get records from a Lark Base table
+
+        Args:
+            app_token: The Base app token (from Base URL)
+            table_id: The table ID
+            page_size: Number of records per page (max 500, default 100)
+            page_token: Token for pagination
+            view_id: Optional view ID to filter records
+            filter: Optional filter formula
+
+        Returns:
+            Dict with 'items' (records) and 'has_more' (pagination) or None
+        """
+        if not self.access_token:
+            logger.error("Lark client not initialized")
+            return None
+
+        self._refresh_token_if_needed()
+
+        url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records"
+
+        headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
+
+        params = {
+            "page_size": min(page_size, 500)  # Max 500 per request
+        }
+
+        if page_token:
+            params["page_token"] = page_token
+        if view_id:
+            params["view_id"] = view_id
+        if filter:
+            params["filter"] = filter
+
+        try:
+            response = requests.get(url, headers=headers, params=params)
+            result = response.json()
+
+            if result.get("code") == 0:
+                data = result.get("data", {})
+                records = data.get("items", [])
+                has_more = data.get("has_more", False)
+                next_page_token = data.get("page_token")
+
+                logger.info(f"Retrieved {len(records)} records from table {table_id}")
+
+                return {
+                    "items": records,
+                    "has_more": has_more,
+                    "page_token": next_page_token
+                }
+            else:
+                logger.error(f"Error getting records: {result}")
+                return None
+
+        except Exception as e:
+            logger.error(f"Error getting base records: {e}")
+            return None
+
+    def get_all_base_records(
+        self,
+        app_token: str,
+        table_id: str,
+        view_id: Optional[str] = None,
+        filter: Optional[str] = None,
+        max_records: Optional[int] = None,
+    ) -> Optional[List[Dict]]:
+        """
+        Get all records from a Lark Base table (handles pagination automatically)
+
+        Args:
+            app_token: The Base app token
+            table_id: The table ID
+            view_id: Optional view ID
+            filter: Optional filter formula
+            max_records: Maximum number of records to retrieve (None = all)
+
+        Returns:
+            List of all records or None if error
+        """
+        all_records = []
+        page_token = None
+        has_more = True
+
+        while has_more:
+            result = self.get_base_records(
+                app_token=app_token,
+                table_id=table_id,
+                page_size=500,  # Max per request
+                page_token=page_token,
+                view_id=view_id,
+                filter=filter,
+            )
+
+            if not result:
+                logger.error("Failed to retrieve records")
+                return None
+
+            all_records.extend(result["items"])
+            has_more = result["has_more"]
+            page_token = result.get("page_token")
+
+            # Check if we've hit max_records limit
+            if max_records and len(all_records) >= max_records:
+                all_records = all_records[:max_records]
+                break
+
+            # Safety check to prevent infinite loops
+            if len(all_records) > 10000:
+                logger.warning(f"Retrieved over 10,000 records, stopping pagination")
+                break
+
+        logger.info(f"Retrieved total of {len(all_records)} records")
+        return all_records
+
+    def search_base_records(
+        self,
+        app_token: str,
+        table_id: str,
+        filter: Optional[str] = None,
+        sort: Optional[List[Dict]] = None,
+        field_names: Optional[List[str]] = None,
+        page_size: int = 100,
+    ) -> Optional[List[Dict]]:
+        """
+        Search records in a Lark Base table with advanced filtering
+
+        Args:
+            app_token: The Base app token
+            table_id: The table ID
+            filter: Filter formula (e.g., 'CurrentValue.[Field] = "value"')
+            sort: List of sort conditions [{"field_name": "Field", "desc": False}]
+            field_names: List of field names to return (None = all fields)
+            page_size: Number of records per page
+
+        Returns:
+            List of matching records or None if error
+        """
+        if not self.access_token:
+            logger.error("Lark client not initialized")
+            return None
+
+        self._refresh_token_if_needed()
+
+        url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{app_token}/tables/{table_id}/records/search"
+
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "page_size": min(page_size, 500)
+        }
+
+        if filter:
+            payload["filter"] = filter
+        if sort:
+            payload["sort"] = sort
+        if field_names:
+            payload["field_names"] = field_names
+
+        try:
+            response = requests.post(url, headers=headers, json=payload)
+            result = response.json()
+
+            if result.get("code") == 0:
+                records = result.get("data", {}).get("items", [])
+                logger.info(f"Found {len(records)} matching records")
+                return records
+            else:
+                logger.error(f"Error searching records: {result}")
+                return None
+
+        except Exception as e:
+            logger.error(f"Error searching base records: {e}")
+            return None
+
+    def parse_base_url(self, url: str) -> Optional[Dict[str, str]]:
+        """
+        Parse a Lark Base URL to extract app_token, table_id, and view_id
+
+        Args:
+            url: Lark Base URL (e.g., https://xxx.larksuite.com/base/APP_TOKEN?table=TABLE_ID&view=VIEW_ID)
+
+        Returns:
+            Dict with 'app_token', 'table_id', 'view_id' or None if invalid
+        """
+        import re
+        from urllib.parse import urlparse, parse_qs
+
+        try:
+            # Extract app_token from path
+            match = re.search(r'/base/([a-zA-Z0-9]+)', url)
+            if not match:
+                logger.error("Could not extract app_token from URL")
+                return None
+
+            app_token = match.group(1)
+
+            # Parse query parameters for table_id and view_id
+            parsed = urlparse(url)
+            params = parse_qs(parsed.query)
+
+            table_id = params.get('table', [None])[0]
+            view_id = params.get('view', [None])[0]
+
+            result = {
+                'app_token': app_token,
+                'table_id': table_id,
+                'view_id': view_id
+            }
+
+            logger.info(f"Parsed Base URL: {result}")
+            return result
+
+        except Exception as e:
+            logger.error(f"Error parsing Base URL: {e}")
+            return None
+
 
 # Global Lark client instance
 lark_client = LarkClient()

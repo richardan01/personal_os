@@ -36,6 +36,11 @@ class Settings(BaseSettings):
     lark_user_id: Optional[str] = None
     lark_chat_id: Optional[str] = None
 
+    # Lark Base (Bitable) Configuration
+    lark_base_app_token: Optional[str] = None
+    lark_base_table_id: Optional[str] = None
+    lark_base_view_id: Optional[str] = None
+
     # Messaging Platform Preference
     messaging_platform: str = Field(default="slack", description="slack, lark, or both")
 

@@ -41,10 +41,16 @@ This guide will help you set up Lark integration for your Personal OS.
 2. Add the following **API scopes**:
 
 #### Required Scopes:
+
+**For Messaging:**
 - `im:message` - Send messages
 - `im:message:send_as_bot` - Send as bot
 - `contact:user.base:readonly` - Read user basic info
 - `contact:user:readonly` - Read user details (optional)
+
+**For Base (Bitable) Integration:**
+- `bitable:app` - Read and write base data
+- `bitable:app:readonly` - Read base data (if you only need read access)
 
 3. Click **"Save"** and then **"Submit for Review"** (if required)
 
@@ -146,6 +152,75 @@ Testing Lark Client...
 ```
 
 You should receive a test message in Lark!
+
+---
+
+## 📊 Using Lark Base Integration
+
+### Step 8: Configure Base Access
+
+To read data from your Lark Bases (like interview notes, feedback, or user research):
+
+1. **Get your Base URL** - Open your Lark Base and copy the URL
+   - Example: `https://xxx.larksuite.com/base/Adgxb8OxhaALzSstbuMlJsI2gQd?table=tblfeqt94MooBQ8W&view=vewhzzGdMk`
+
+2. **Extract the IDs** from your URL:
+   - **App Token**: `Adgxb8OxhaALzSstbuMlJsI2gQd` (after `/base/`)
+   - **Table ID**: `tblfeqt94MooBQ8W` (after `?table=`)
+   - **View ID**: `vewhzzGdMk` (after `&view=`)
+
+3. **Add to `.env`**:
+   ```bash
+   LARK_BASE_APP_TOKEN=Adgxb8OxhaALzSstbuMlJsI2gQd
+   LARK_BASE_TABLE_ID=tblfeqt94MooBQ8W
+   LARK_BASE_VIEW_ID=vewhzzGdMk
+   ```
+
+4. **Grant Base Permissions**:
+   - Go to your Lark Base
+   - Click **Share** → **Advanced Settings**
+   - Add your bot app with **Read** or **Edit** permissions
+
+### Step 9: Test Base Reading
+
+Run the test script to read records from your base:
+
+```bash
+cd automation
+python utils/test_lark_base.py
+```
+
+**Expected output:**
+```
+Testing Lark Base Integration...
+==================================================
+✅ Successfully parsed Base URL
+✅ App Token: Adgxb8OxhaALzSstbuMlJsI2gQd
+✅ Table ID: tblfeqt94MooBQ8W
+✅ Retrieved 15 records from base
+==================================================
+```
+
+### Using Base Data in Agents
+
+**Example: Read interview notes for Discovery Agent**
+
+```python
+from utils.lark_client import lark_client
+
+# Get all records from your interview notes table
+records = lark_client.get_all_base_records(
+    app_token="your_app_token",
+    table_id="your_table_id"
+)
+
+# Process each interview
+for record in records:
+    fields = record.get('fields', {})
+    interviewee = fields.get('Interviewee Name')
+    notes = fields.get('Notes')
+    # Use with Discovery Agent...
+```
 
 ---
 
