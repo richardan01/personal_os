@@ -1,6 +1,6 @@
 # Personal OS - System Architecture
 
-## 🏗️ High-Level Architecture
+## High-Level Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -15,8 +15,8 @@
 ┌──────────────┐      ┌──────────────┐     ┌──────────────┐
 │   AI Engine  │      │  Integrations│     │   Scheduler  │
 │              │      │              │     │              │
-│ Claude/GPT   │      │  • Slack     │     │  • Daily     │
-│              │      │  • Calendar  │     │  • Weekly    │
+│ Claude/GPT   │      │  • Google    │     │  • Daily     │
+│              │      │    Workspace │     │  • Weekly    │
 │ Generates:   │      │  • Tasks     │     │  • Triggers  │
 │ • Plans      │      │  • CRM       │     │              │
 │ • Summaries  │      │              │     │              │
@@ -27,26 +27,28 @@
                               │
                               ▼
                     ┌──────────────────┐
-                    │     4 Agents     │
+                    │     5 Agents     │
                     │                  │
                     │  1. Execution    │
                     │  2. Strategy     │
                     │  3. Discovery    │
                     │  4. Stakeholder  │
+                    │  5. Stakeholder  │
+                    │     Discovery    │
                     └──────────────────┘
                               │
                               ▼
                     ┌──────────────────┐
-                    │   Slack (You)    │
+                    │  Google Docs     │
                     │                  │
-                    │  Daily updates   │
-                    │  in DMs          │
+                    │  Reports &       │
+                    │  Updates         │
                     └──────────────────┘
 ```
 
 ---
 
-## 🔄 Data Flow
+## Data Flow
 
 ### Morning Daily Plan Workflow
 
@@ -57,8 +59,8 @@
    │
 2. FETCH DATA
    │
-   ├─→ Calendar API → Today's meetings
-   ├─→ Task System → Open tasks & deadlines
+   ├─→ Google Calendar API → Today's meetings
+   ├─→ Google Tasks API → Open tasks & deadlines
    └─→ Config → Strategic priorities
    │
 3. GENERATE PLAN
@@ -71,18 +73,58 @@
    │           │
    │           └─→ Generated Daily Plan (text)
    │
-4. SEND TO USER
+4. SAVE OUTPUT
    │
-   └─→ slack_client.py
+   └─→ Google Docs
        │
-       └─→ Slack API
-           │
-           └─→ Your DM with daily plan
+       └─→ Daily plan document created
+```
+
+### Stakeholder Discovery Workflow
+
+```
+1. TRIGGER (Weekly or On-Demand)
+   │
+   ├─→ main.py (scheduler)
+   │
+2. SEARCH & FETCH DOCUMENTS
+   │
+   ├─→ Document Search Skill → Google Drive
+   │   └─→ Find meeting notes, PRDs, interview transcripts
+   │
+   ├─→ Document Reader Skill → Google Docs/Sheets/Slides
+   │   └─→ Extract content from found documents
+   │
+3. AI-POWERED SYNTHESIS
+   │
+   ├─→ Note Synthesis Skill
+   │   └─→ Claude extracts stakeholder insights
+   │       • Names, roles, concerns, needs
+   │       • Quotes, sentiment, priorities
+   │
+4. BUILD PROFILES & RELATIONSHIPS
+   │
+   ├─→ Stakeholder Profiler Skill
+   │   └─→ Create/update stakeholder profiles
+   │
+   ├─→ Relationship Mapper Skill
+   │   └─→ Map influence and connections
+   │
+5. AGGREGATE & REPORT
+   │
+   ├─→ Insight Aggregator Skill
+   │   └─→ Find patterns across stakeholders
+   │
+   ├─→ Task Creator Skill → Google Tasks
+   │   └─→ Create follow-up action items
+   │
+   └─→ Report Generator Skill → Google Docs
+       └─→ Generate stakeholder analysis report
 ```
 
 ---
 
-## 📦 Component Details
+## Component Details
 
 ### Core Components
 
@@ -100,6 +142,7 @@ Key Functions:
 - run_morning_daily_plan()
 - run_midday_progress_check()
 - run_evening_summary()
+- run_weekly_stakeholder_discovery()
 ```
 
 #### 2. **config.py** - Configuration
@@ -111,6 +154,7 @@ Responsibilities:
 
 Key Settings:
 - API keys
+- Google Workspace credentials
 - Schedule times
 - Personal context
 - Feature flags
@@ -131,25 +175,89 @@ Supports:
 - Token limits
 ```
 
-#### 4. **slack_client.py** - Slack Interface
-```python
-Responsibilities:
-- Send messages to Slack
-- Format rich messages
-- Handle channels/DMs
-- Error recovery
+---
 
-Functions:
-- send_message()
-- send_dm()
-- send_formatted_message()
-- send_daily_plan()
-- send_alert()
+## Google Workspace Integration
+
+### Client Architecture
+
+```
+utils/google/
+├── base_client.py      # OAuth2/Service Account auth
+├── drive_client.py     # File storage and search
+├── docs_client.py      # Document creation and reading
+├── sheets_client.py    # Spreadsheet operations
+├── slides_client.py    # Presentation management
+├── calendar_client.py  # Event and scheduling
+└── tasks_client.py     # Task management
+```
+
+### Authentication Flow
+
+```
+1. Load Credentials
+   │
+   ├─→ Service Account (for server-to-server)
+   │   └─→ GOOGLE_SERVICE_ACCOUNT_FILE
+   │
+   └─→ OAuth2 (for user-specific access)
+       └─→ GOOGLE_CREDENTIALS_FILE
+           │
+           └─→ Token storage/refresh
+```
+
+### API Scopes
+
+```python
+SCOPES = [
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/documents',
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/presentations',
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/tasks',
+]
 ```
 
 ---
 
-## 🤖 Agent Architecture
+## Skills Architecture
+
+### Skill Pattern
+
+Each skill follows this structure:
+
+```python
+class Skill:
+    """
+    Skills are stateless, reusable building blocks.
+    They perform one specific task well.
+    """
+
+    def __init__(self, clients: Dict[str, Any]):
+        # Inject required clients (Google, AI, etc.)
+
+    def execute(self, inputs: Dict) -> Dict:
+        # Perform the skill's specific task
+        # Return structured results
+```
+
+### Available Skills
+
+| Skill | Purpose | Input | Output |
+|-------|---------|-------|--------|
+| DocumentSearch | Find docs in Drive | Query, filters | List of file IDs |
+| DocumentReader | Extract content | File ID, doc type | DocumentContent |
+| NoteSynthesis | AI extraction | Raw text | StakeholderInsights |
+| StakeholderProfiler | Build profiles | Insights | StakeholderProfiles |
+| RelationshipMapper | Map connections | Profiles | InfluenceMatrix |
+| InsightAggregator | Find patterns | All insights | Themes, conflicts |
+| TaskCreator | Create tasks | Action items | Task IDs |
+| ReportGenerator | Generate reports | All data | Doc ID |
+
+---
+
+## Agent Architecture
 
 ### Agent Pattern
 
@@ -157,75 +265,89 @@ Each agent follows this structure:
 
 ```python
 class Agent:
+    """
+    Agents are orchestrators that combine skills
+    to accomplish complex workflows.
+    """
+
     def __init__(self):
-        # Initialize agent
+        # Initialize required skills
 
-    def generate_[workflow](self, inputs):
-        # Build prompt with context
-        # Call AI client
-        # Return generated content
-
-    def send_to_slack(self, content):
-        # Format for Slack
-        # Send via slack_client
+    def run_workflow(self, inputs):
+        # Orchestrate multiple skills
+        # Handle state and errors
+        # Return final results
 ```
 
-### Execution Agent Flow
+### Stakeholder Discovery Agent
 
 ```
-Input Sources          Agent Logic           Output Destinations
-─────────────         ──────────────        ───────────────────
-
-Calendar Events  ──┐
-                   │
-Open Tasks       ──┤──→ Build Context  ──→  Generate     ──→  Slack DM
-                   │    with Prompt         Daily Plan
-Priorities       ──┤
-                   │
-Yesterday Data   ──┘
-```
-
----
-
-## 🔌 Integration Points
-
-### Current Integrations
-
-```
-┌────────────────┐
-│  Slack Bot     │ ──→ Receives all outputs
-│                │ ──→ Can trigger workflows (future)
-└────────────────┘
-
-┌────────────────┐
-│  AI Provider   │ ──→ Claude or OpenAI
-│  (Claude/GPT)  │ ──→ Generates all text
-└────────────────┘
-```
-
-### Future Integrations
-
-```
-┌────────────────┐
-│ Google Calendar│ ──→ Fetch meetings/events
-│                │ ──→ Block focus time
-└────────────────┘
-
-┌────────────────┐
-│ Notion/Jira    │ ──→ Fetch tasks
-│                │ ──→ Update status
-│                │ ──→ Create tasks
-└────────────────┘
-
-┌────────────────┐
-│ Analytics      │ ──→ Fetch metrics
-│ (Mixpanel)     │ ──→ Track KPIs
-└────────────────┘
+StakeholderDiscoveryAgent
+│
+├── Skills Used:
+│   ├── DocumentSearchSkill
+│   ├── DocumentReaderSkill
+│   ├── NoteSynthesisSkill
+│   ├── StakeholderProfilerSkill
+│   ├── RelationshipMapperSkill
+│   ├── InsightAggregatorSkill
+│   ├── TaskCreatorSkill
+│   └── ReportGeneratorSkill
+│
+├── Workflow Steps:
+│   1. Search for relevant documents
+│   2. Read and extract content
+│   3. Synthesize stakeholder insights (AI)
+│   4. Build/update stakeholder profiles
+│   5. Map relationships and influence
+│   6. Aggregate insights across stakeholders
+│   7. Create follow-up tasks
+│   8. Generate comprehensive report
+│
+└── Outputs:
+    ├── StakeholderProfiles (Dict)
+    ├── InfluenceMatrix (Object)
+    ├── ActionItems (List)
+    └── Report (Google Doc URL)
 ```
 
 ---
 
-## 📅 Scheduling System
+## Data Models
+
+### Model Architecture
+
+```
+models/
+├── enums.py          # DocType, Sentiment, Priority, etc.
+├── document.py       # DocumentContent, TableData
+├── insight.py        # Concern, Need, Quote, Theme
+├── stakeholder.py    # StakeholderInsight, StakeholderProfile
+├── relationship.py   # Relationship, InfluenceMatrix
+├── action.py         # ActionItem, InteractionSummary
+└── report.py         # InsightSummary, DiscoveryReport
+```
+
+### Key Data Classes
+
+```python
+@dataclass
+class StakeholderProfile:
+    name: str
+    role: str
+    department: str
+    influence_level: InfluenceLevel
+    concerns: List[Concern]
+    needs: List[Need]
+    quotes: List[Quote]
+    relationships: List[Relationship]
+    engagement_history: List[InteractionSummary]
+    action_items: List[ActionItem]
+```
+
+---
+
+## Scheduling System
 
 ### Schedule Architecture
 
@@ -247,12 +369,13 @@ while True:
 |--------------|---------|----------|
 | Daily at time | `every().day.at("08:00")` | Morning plan |
 | Weekday at time | `every().monday.at("09:00")` | Weekly review |
+| Weekly | `every().friday.at("15:00")` | Stakeholder discovery |
 | Interval | `every(2).hours` | Periodic check |
 | Immediate | `run_pending()` | Manual trigger |
 
 ---
 
-## 🔐 Security Architecture
+## Security Architecture
 
 ### Secrets Management
 
@@ -260,6 +383,7 @@ while True:
 .env (Local Development)
 ├── API Keys (encrypted at rest)
 ├── Tokens (never committed to git)
+├── Google credentials path
 └── Personal data
 
 Production (Future)
@@ -271,28 +395,35 @@ Production (Future)
 ### Access Control
 
 ```
-Slack Bot Scopes:
-├── chat:write (Send messages)
-├── users:read (Get user info)
-├── channels:read (List channels)
-└── im:write (Send DMs)
+Google Workspace Scopes:
+├── drive (File access)
+├── documents (Doc read/write)
+├── spreadsheets (Sheet read/write)
+├── presentations (Slides read/write)
+├── calendar (Event read/write)
+└── tasks (Task management)
 
 API Permissions:
 ├── AI: Read-only (no training on data)
-└── Calendar: Read-only (fetch events)
+└── Google: Limited to specified resources
 ```
 
 ---
 
-## 📊 State Management
+## State Management
 
-### Current State (Stateless)
+### Current State (Hybrid)
 
 ```
-Each workflow is independent:
-- No persistent database
-- Fresh context each run
-- Logs stored in files
+Each workflow can be:
+- Stateless (fresh context each run)
+- Cached (in-memory during session)
+- Persisted (to Google Sheets/Drive)
+
+Stakeholder data storage:
+├── Profiles → Google Sheets
+├── Reports → Google Docs
+└── Tasks → Google Tasks
 ```
 
 ### Future State (Stateful)
@@ -310,7 +441,7 @@ Each workflow is independent:
 
 ---
 
-## 🚀 Deployment Options
+## Deployment Options
 
 ### Option 1: Local Machine (Current)
 ```
@@ -347,7 +478,7 @@ AWS Lambda + EventBridge
 
 ---
 
-## 🔧 Configuration Flow
+## Configuration Flow
 
 ```
 1. .env file
@@ -367,50 +498,26 @@ AWS Lambda + EventBridge
 
 ---
 
-## 📈 Scalability
-
-### Current Scale
-- 1 user (you)
-- 4 agents
-- ~10 workflows/day
-- Minimal resource usage
-
-### Future Scale
-```
-Multi-User:
-├── User database
-├── Per-user config
-├── Isolated workflows
-└── Admin dashboard
-
-Multi-Agent:
-├── Agent marketplace
-├── Custom agent builder
-├── Agent collaboration
-└── Swarm intelligence
-```
-
----
-
-## 🧪 Testing Strategy
+## Testing Strategy
 
 ### Unit Tests (Future)
 ```python
 tests/
 ├── test_execution_agent.py
+├── test_stakeholder_discovery_agent.py
 ├── test_ai_client.py
-├── test_slack_client.py
+├── test_google_clients.py
+├── test_skills.py
 └── test_config.py
 ```
 
 ### Integration Tests (Future)
 ```python
 # Test full workflow
-def test_morning_plan_workflow():
-    # Mock calendar
-    # Mock task system
+def test_stakeholder_discovery_workflow():
+    # Mock Google APIs
     # Run workflow
-    # Verify Slack message
+    # Verify report generated
 ```
 
 ### Manual Testing (Current)
@@ -418,13 +525,13 @@ def test_morning_plan_workflow():
 # Test each component
 python config.py
 python utils/ai_client.py
-python utils/slack_client.py
-python agents/execution_agent.py
+python utils/google/drive_client.py
+python agents/stakeholder_discovery_agent.py
 ```
 
 ---
 
-## 📝 Error Handling
+## Error Handling
 
 ### Error Flow
 
@@ -433,7 +540,7 @@ Error Occurs
 │
 ├─→ Logged to file (logs/personal_os.log)
 │
-├─→ Slack alert sent (if critical)
+├─→ Alert generated (if critical)
 │
 └─→ Graceful degradation
     │
@@ -454,31 +561,7 @@ Error Occurs
 
 ---
 
-## 🔄 Update & Maintenance
-
-### Version Control
-```
-Git Repository
-├── main branch (stable)
-├── develop branch (testing)
-└── feature/* branches
-```
-
-### Update Process
-```bash
-# Pull latest code
-git pull origin main
-
-# Update dependencies
-pip install -r requirements.txt --upgrade
-
-# Restart system
-python main.py
-```
-
----
-
-## 📱 Future Enhancements
+## Future Enhancements
 
 ### Phase 2: Enhanced Agents
 ```
@@ -499,7 +582,7 @@ python main.py
 
 ---
 
-## 🎯 Success Metrics
+## Success Metrics
 
 ### System Health
 - Uptime: Target 99%
@@ -513,7 +596,7 @@ python main.py
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 ### Adding a New Component
 

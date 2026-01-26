@@ -4,21 +4,21 @@ Automate your product management workflows with AI-powered agents that help you 
 
 ---
 
-## 🎯 What This Does
+## What This Does
 
 Your Personal OS runs in the background and:
 
 - **8:00 AM**: Sends you a prioritized daily plan based on your calendar and tasks
 - **12:30 PM**: Checks your progress and suggests adjustments
 - **5:30 PM**: Summarizes your day and prepares tomorrow's priorities
-- **Weekly**: Generates status updates for stakeholders
+- **Weekly**: Runs stakeholder discovery to analyze meeting notes and build profiles
 - **Continuous**: Processes feedback and insights as they arrive
 
-All delivered directly to your Slack DMs.
+All outputs are saved to Google Docs for easy reference and sharing.
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ### 1. Install Dependencies
 ```bash
@@ -28,7 +28,7 @@ pip install -r requirements.txt
 ### 2. Set Up Configuration
 ```bash
 cp .env.example .env
-# Edit .env with your API keys
+# Edit .env with your API keys and Google Workspace credentials
 ```
 
 ### 3. Run the System
@@ -36,47 +36,49 @@ cp .env.example .env
 python main.py
 ```
 
-**👉 For detailed setup instructions, see [SETUP_GUIDE.md](./SETUP_GUIDE.md)**
+**For detailed setup instructions, see [SETUP_GUIDE.md](./SETUP_GUIDE.md)**
 
 ---
 
-## 🤖 Available Agents
+## Available Agents
 
-### Execution Agent ✅
+### Execution Agent
 - Daily plan generation
 - Progress tracking
 - Daily summaries
 - Blocker management
 
-**Status**: ✅ Fully implemented
+**Status**: Fully implemented
 
-### Strategy Agent 🎯
+### Strategy Agent
 - Daily strategy alignment
 - OKR tracking
 - Competitive analysis
 - Roadmap reviews
 
-**Status**: 🚧 Coming soon
+**Status**: Coming soon
 
-### Discovery Agent 💡
+### Discovery Agent
 - Feedback synthesis
 - Interview analysis
 - Trend detection
 - Feature request prioritization
 
-**Status**: 🚧 Coming soon
+**Status**: Coming soon
 
-### Stakeholder Agent 📊
-- Meeting agendas/notes
-- Status updates
-- Stakeholder mapping
-- Communication management
+### Stakeholder Discovery Agent (NEW)
+- Scans meeting notes and documents in Google Drive
+- Extracts stakeholder insights using AI
+- Builds and maintains stakeholder profiles
+- Maps relationships and influence
+- Creates follow-up tasks in Google Tasks
+- Generates comprehensive reports in Google Docs
 
-**Status**: 🚧 Coming soon
+**Status**: Fully implemented
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 automation/
@@ -89,20 +91,44 @@ automation/
 │
 ├── agents/                    # AI agents
 │   ├── execution_agent.py    # Daily planning & tracking
+│   ├── stakeholder_discovery_agent.py  # Stakeholder analysis
 │   ├── strategy_agent.py     # Coming soon
-│   ├── discovery_agent.py    # Coming soon
-│   └── stakeholder_agent.py  # Coming soon
+│   └── discovery_agent.py    # Coming soon
+│
+├── skills/                    # Reusable skill modules
+│   ├── document_search.py    # Search Google Drive
+│   ├── document_reader.py    # Read Docs/Sheets/Slides
+│   ├── note_synthesis.py     # AI-powered extraction
+│   ├── stakeholder_profiler.py  # Build profiles
+│   ├── relationship_mapper.py   # Map influence
+│   ├── insight_aggregator.py    # Find patterns
+│   ├── task_creator.py       # Create Google Tasks
+│   └── report_generator.py   # Generate reports
+│
+├── models/                    # Data models
+│   ├── enums.py              # Enumerations
+│   ├── document.py           # Document models
+│   ├── insight.py            # Insight models
+│   ├── stakeholder.py        # Stakeholder models
+│   ├── relationship.py       # Relationship models
+│   ├── action.py             # Action item models
+│   └── report.py             # Report models
 │
 ├── utils/                     # Utility modules
 │   ├── ai_client.py          # AI provider interface
-│   ├── slack_client.py       # Slack integration
-│   ├── calendar_client.py    # Coming soon
-│   └── task_client.py        # Coming soon
+│   └── google/               # Google Workspace clients
+│       ├── base_client.py    # Auth handling
+│       ├── drive_client.py   # Google Drive
+│       ├── docs_client.py    # Google Docs
+│       ├── sheets_client.py  # Google Sheets
+│       ├── slides_client.py  # Google Slides
+│       ├── calendar_client.py # Google Calendar
+│       └── tasks_client.py   # Google Tasks
 │
 ├── integrations/              # Third-party integrations
 │   ├── notion.py             # Coming soon
 │   ├── jira.py               # Coming soon
-│   └── google_calendar.py    # Coming soon
+│   └── asana.py              # Coming soon
 │
 └── logs/                      # Application logs
     └── personal_os.log
@@ -110,28 +136,30 @@ automation/
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 All configuration is done via environment variables in `.env`:
 
 ### Required
 - `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` - AI provider
-- `SLACK_BOT_TOKEN` - Slack bot token
-- `SLACK_USER_ID` - Your Slack user ID
+- `GOOGLE_CREDENTIALS_FILE` - Path to Google OAuth credentials
+- `GOOGLE_CALENDAR_ID` - Your Google Calendar ID
 
 ### Optional
-- `NOTION_API_KEY` - For task integration
+- `GOOGLE_SERVICE_ACCOUNT_FILE` - For service account auth
+- `GOOGLE_DRIVE_FOLDER_ID` - Folder for stakeholder documents
+- `GOOGLE_TASKS_LIST_ID` - Task list for action items
+- `NOTION_API_KEY` - For Notion integration
 - `JIRA_URL` - For Jira integration
-- `GOOGLE_CALENDAR_CREDENTIALS` - For calendar integration
 
 See `.env.example` for all options.
 
 ---
 
-## 🚀 Usage Examples
+## Usage Examples
 
 ### Run in Dry Run Mode
-Test without sending actual messages:
+Test without saving actual documents:
 ```bash
 # In .env
 DRY_RUN=true
@@ -142,6 +170,7 @@ python main.py
 ### Run a Specific Agent Manually
 ```bash
 python agents/execution_agent.py
+python agents/stakeholder_discovery_agent.py
 ```
 
 ### Test Components
@@ -152,20 +181,20 @@ python config.py
 # Test AI client
 python utils/ai_client.py
 
-# Test Slack client
-python utils/slack_client.py
+# Test Google clients
+python utils/google/drive_client.py
 ```
 
 ---
 
-## ⏰ Default Schedule
+## Default Schedule
 
 | Time | Workflow | Agent |
 |------|----------|-------|
 | 8:00 AM | Daily Plan | Execution |
 | 12:30 PM | Progress Check | Execution |
 | 5:30 PM | Daily Summary | Execution |
-| Friday 3:00 PM | Weekly Update | Stakeholder |
+| Friday 3:00 PM | Stakeholder Discovery | Stakeholder Discovery |
 
 Customize in `.env`:
 ```bash
@@ -176,49 +205,63 @@ EXECUTION_AGENT_EVENING_TIME=18:00
 
 ---
 
-## 🔌 Integrations
+## Integrations
 
 ### Current
-- ✅ Slack (messaging)
-- ✅ Anthropic Claude (AI)
-- ✅ OpenAI GPT (AI alternative)
+- Google Workspace (Drive, Docs, Sheets, Slides, Calendar, Tasks)
+- Anthropic Claude (AI)
+- OpenAI GPT (AI alternative)
 
 ### Coming Soon
-- 🚧 Google Calendar
-- 🚧 Notion
-- 🚧 Jira
-- 🚧 Linear
-- 🚧 Asana
+- Notion
+- Jira
+- Linear
+- Asana
 
 ---
 
-## 📊 Example Output
+## Example Output
 
-### Daily Plan (Slack DM)
+### Stakeholder Discovery Report (Google Doc)
+
 ```
-📋 Your Daily Plan
+# Stakeholder Discovery Report
+Generated: 2026-01-26
 
-## Daily Execution Plan - 2026-01-01
+## Executive Summary
+Analyzed 15 documents, identified 8 stakeholders across 3 departments.
 
-### Top 3 Priorities:
-1. Complete PRD for Feature X - Links to Q1 OKR - 4h
-2. Review design mockups - Unblocks designer - 1h
-3. Team standup preparation - 15m
+## Key Stakeholders
 
-### Time-Blocked Schedule:
-8:00-9:00 AM: [FOCUS] PRD Writing
-9:00-9:15 AM: Team Standup
+### Sarah Chen - VP of Engineering
+- **Influence Level**: High
+- **Stance**: Supportive
+- **Top Concerns**:
+  - Technical debt in authentication system
+  - Team capacity for Q2 roadmap
+- **Key Quotes**:
+  "We need at least 2 sprints to properly address the auth issues"
+- **Recommended Actions**:
+  - Schedule technical deep-dive meeting
+  - Share Q2 capacity planning doc
+
+### Mike Johnson - Sales Director
+- **Influence Level**: High
+- **Stance**: Neutral
 ...
 
-### Success Criteria:
-✅ PRD 80% complete
-✅ Design feedback provided
-✅ All urgent emails handled
+## Relationship Map
+[Influence matrix showing connections between stakeholders]
+
+## Recommended Follow-ups
+1. [ ] Schedule 1:1 with Sarah Chen re: auth concerns
+2. [ ] Share roadmap draft with Mike Johnson
+3. [ ] Prepare executive summary for leadership sync
 ```
 
 ---
 
-## 🛠️ Customization
+## Customization
 
 ### Modify Agent Prompts
 Edit prompts in `agents/execution_agent.py`:
@@ -253,7 +296,7 @@ AI_MODEL=gpt-4-turbo-preview  # For OpenAI
 
 ---
 
-## 📝 Logging
+## Logging
 
 Logs are written to `logs/personal_os.log`:
 
@@ -276,22 +319,24 @@ Log levels (set in `.env`):
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
 **"Configuration validation failed"**
 - Check your `.env` file has all required fields
 - Verify API keys are correct
+- Ensure Google credentials file exists
 
-**"Slack API error: invalid_auth"**
-- Regenerate your Slack bot token
-- Make sure bot is installed to workspace
+**"Google API error: invalid credentials"**
+- Re-run OAuth flow to refresh tokens
+- Check service account permissions
+- Verify API is enabled in Google Cloud Console
 
-**"No messages received"**
-- Check `DRY_RUN=false` in `.env`
-- Verify bot has `chat:write` scope
-- Check bot is in channel (if sending to channel)
+**"No documents found"**
+- Check `GOOGLE_DRIVE_FOLDER_ID` is correct
+- Ensure service account has access to the folder
+- Try broader search terms
 
 **"Module not found"**
 - Activate virtual environment: `source venv/bin/activate`
@@ -301,7 +346,7 @@ See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for more troubleshooting.
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
 ### Run Locally (Development)
 ```bash
@@ -330,14 +375,14 @@ python main.py
 
 ---
 
-## 🔒 Security
+## Security
 
 ### Best Practices
-- ✅ Never commit `.env` file (already in `.gitignore`)
-- ✅ Use environment variables for secrets
-- ✅ Rotate API keys regularly
-- ✅ Review logs for sensitive data before sharing
-- ✅ Use read-only permissions where possible
+- Never commit `.env` file (already in `.gitignore`)
+- Use environment variables for secrets
+- Rotate API keys regularly
+- Review logs for sensitive data before sharing
+- Use read-only permissions where possible
 
 ### Secrets Management
 ```bash
@@ -350,7 +395,7 @@ python main.py
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 ### Adding a New Agent
 
@@ -360,40 +405,41 @@ python main.py
 4. Add schedule in `setup_schedules()`
 5. Test thoroughly
 
-### Adding an Integration
+### Adding a Skill
 
-1. Create integration file: `integrations/service.py`
-2. Implement API client
-3. Add config variables to `.env.example`
+1. Create skill file: `skills/your_skill.py`
+2. Implement skill class following the pattern
+3. Add to agent that needs it
 4. Document in README
 5. Add tests
 
 ---
 
-## 📚 Resources
+## Resources
 
 - [Detailed Setup Guide](./SETUP_GUIDE.md)
-- [Agent Implementation Templates](../agents/)
-- [Personal OS Design Doc](../personal-os-design.md)
+- [Architecture Overview](./ARCHITECTURE.md)
+- [Agent Implementation Templates](./agents/)
 
 ---
 
-## 🎯 Roadmap
+## Roadmap
 
-### Phase 1: Core Execution ✅
+### Phase 1: Core Execution
 - [x] Execution Agent
-- [x] Slack integration
+- [x] Google Workspace integration
 - [x] AI client (Claude/OpenAI)
 - [x] Scheduling system
+- [x] Stakeholder Discovery Agent
+- [x] Skills architecture
 
-### Phase 2: Enhanced Intelligence 🚧
+### Phase 2: Enhanced Intelligence
 - [ ] Strategy Agent
 - [ ] Discovery Agent
 - [ ] Stakeholder Agent
-- [ ] Calendar integration
-- [ ] Task system integration
+- [ ] Task system integrations (Notion, Jira)
 
-### Phase 3: Advanced Features 📋
+### Phase 3: Advanced Features
 - [ ] Analytics dashboard
 - [ ] Multi-user support
 - [ ] Custom workflows builder
@@ -402,13 +448,13 @@ python main.py
 
 ---
 
-## 📄 License
+## License
 
 This is a personal productivity tool. Use and modify as needed for your own workflow.
 
 ---
 
-## 💬 Support
+## Support
 
 For questions or issues:
 1. Check [SETUP_GUIDE.md](./SETUP_GUIDE.md)
@@ -418,15 +464,15 @@ For questions or issues:
 
 ---
 
-## 🎉 Success Stories
+## Success Stories
 
 Once running, you can expect:
 - **30%+ time savings** on planning and status updates
-- **Better strategic alignment** with daily checks
+- **Better stakeholder relationships** with organized insights
 - **No missed priorities** with automated planning
 - **Consistent communication** with stakeholders
 - **More focus time** by automating routine tasks
 
 ---
 
-**Built with ❤️ for Product Managers who want to focus on building great products, not managing tasks.**
+**Built for Product Managers who want to focus on building great products, not managing tasks.**
