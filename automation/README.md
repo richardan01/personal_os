@@ -40,6 +40,96 @@ python main.py
 
 ---
 
+## System Architecture
+
+### High-Level Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         PERSONAL OS                             │
+│                    (Python Automation System)                   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        │                     │                     │
+        ▼                     ▼                     ▼
+┌──────────────┐      ┌──────────────┐     ┌──────────────┐
+│   AI Engine  │      │  Integrations│     │   Scheduler  │
+│              │      │              │     │              │
+│ Claude/GPT   │      │  • Google    │     │  • Daily     │
+│              │      │    Workspace │     │  • Weekly    │
+│ Generates:   │      │  • Tasks     │     │  • Triggers  │
+│ • Plans      │      │  • CRM       │     │              │
+│ • Summaries  │      │              │     │              │
+│ • Insights   │      │              │     │              │
+└──────────────┘      └──────────────┘     └──────────────┘
+        │                     │                     │
+        └─────────────────────┼─────────────────────┘
+                              │
+                              ▼
+                    ┌──────────────────┐
+                    │      Agents      │
+                    │                  │
+                    │  • Execution     │
+                    │  • Strategy      │
+                    │  • Discovery     │
+                    │  • Stakeholder   │
+                    │    Discovery     │
+                    └──────────────────┘
+                              │
+                              ▼
+                    ┌──────────────────┐
+                    │  Google Docs     │
+                    │                  │
+                    │  Reports &       │
+                    │  Updates         │
+                    └──────────────────┘
+```
+
+### Data Flow - Stakeholder Discovery Workflow
+
+```
+1. TRIGGER (Weekly or On-Demand)
+   │
+   ├─→ main.py (scheduler)
+   │
+2. SEARCH & FETCH DOCUMENTS
+   │
+   ├─→ Document Search Skill → Google Drive
+   │   └─→ Find meeting notes, PRDs, interview transcripts
+   │
+   ├─→ Document Reader Skill → Google Docs/Sheets/Slides
+   │   └─→ Extract content from found documents
+   │
+3. AI-POWERED SYNTHESIS
+   │
+   ├─→ Note Synthesis Skill
+   │   └─→ Claude extracts stakeholder insights
+   │       • Names, roles, concerns, needs
+   │       • Quotes, sentiment, priorities
+   │
+4. BUILD PROFILES & RELATIONSHIPS
+   │
+   ├─→ Stakeholder Profiler Skill
+   │   └─→ Create/update stakeholder profiles
+   │
+   ├─→ Relationship Mapper Skill
+   │   └─→ Map influence and connections
+   │
+5. AGGREGATE & REPORT
+   │
+   ├─→ Insight Aggregator Skill
+   │   └─→ Find patterns across stakeholders
+   │
+   ├─→ Task Creator Skill → Google Tasks
+   │   └─→ Create follow-up action items
+   │
+   └─→ Report Generator Skill → Google Docs
+       └─→ Generate stakeholder analysis report
+```
+
+---
+
 ## Available Agents
 
 ### Execution Agent
@@ -66,7 +156,7 @@ python main.py
 
 **Status**: Coming soon
 
-### Stakeholder Discovery Agent (NEW)
+### Stakeholder Discovery Agent
 - Scans meeting notes and documents in Google Drive
 - Extracts stakeholder insights using AI
 - Builds and maintains stakeholder profiles
@@ -75,6 +165,120 @@ python main.py
 - Generates comprehensive reports in Google Docs
 
 **Status**: Fully implemented
+
+---
+
+## Skills Architecture
+
+Skills are stateless, reusable building blocks that agents combine to accomplish complex workflows.
+
+### Skill Pattern
+
+```python
+class Skill:
+    """
+    Skills are stateless, reusable building blocks.
+    They perform one specific task well.
+    """
+
+    def __init__(self, clients: Dict[str, Any]):
+        # Inject required clients (Google, AI, etc.)
+
+    def execute(self, inputs: Dict) -> Dict:
+        # Perform the skill's specific task
+        # Return structured results
+```
+
+### Available Skills
+
+| Skill | Purpose | Input | Output |
+|-------|---------|-------|--------|
+| DocumentSearch | Find docs in Drive | Query, filters | List of file IDs |
+| DocumentReader | Extract content | File ID, doc type | DocumentContent |
+| NoteSynthesis | AI extraction | Raw text | StakeholderInsights |
+| StakeholderProfiler | Build profiles | Insights | StakeholderProfiles |
+| RelationshipMapper | Map connections | Profiles | InfluenceMatrix |
+| InsightAggregator | Find patterns | All insights | Themes, conflicts |
+| TaskCreator | Create tasks | Action items | Task IDs |
+| ReportGenerator | Generate reports | All data | Doc ID |
+
+---
+
+## Data Models
+
+### Model Architecture
+
+```
+models/
+├── enums.py          # DocType, Sentiment, Priority, InfluenceLevel, Stance
+├── document.py       # DocumentContent, TableData
+├── insight.py        # Concern, Need, Quote, Theme, Conflict
+├── stakeholder.py    # StakeholderInsight, StakeholderProfile
+├── relationship.py   # Relationship, InfluenceMatrix, StakeholderCluster
+├── action.py         # ActionItem, InteractionSummary
+└── report.py         # InsightSummary, DiscoveryReport
+```
+
+### Key Data Classes
+
+```python
+@dataclass
+class StakeholderProfile:
+    name: str
+    role: str
+    department: str
+    influence_level: InfluenceLevel
+    concerns: List[Concern]
+    needs: List[Need]
+    quotes: List[Quote]
+    relationships: List[Relationship]
+    engagement_history: List[InteractionSummary]
+    action_items: List[ActionItem]
+```
+
+---
+
+## Google Workspace Integration
+
+### Client Architecture
+
+```
+utils/google/
+├── base_client.py      # OAuth2/Service Account auth
+├── drive_client.py     # File storage and search
+├── docs_client.py      # Document creation and reading
+├── sheets_client.py    # Spreadsheet operations
+├── slides_client.py    # Presentation management
+├── calendar_client.py  # Event and scheduling
+└── tasks_client.py     # Task management
+```
+
+### Authentication Flow
+
+```
+1. Load Credentials
+   │
+   ├─→ Service Account (for server-to-server)
+   │   └─→ GOOGLE_SERVICE_ACCOUNT_FILE
+   │
+   └─→ OAuth2 (for user-specific access)
+       └─→ GOOGLE_CREDENTIALS_FILE
+           │
+           └─→ Token storage/refresh
+```
+
+### API Scopes
+
+```python
+SCOPES = [
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/documents',
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/presentations',
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/tasks',
+]
+```
 
 ---
 
@@ -89,7 +293,7 @@ automation/
 ├── SETUP_GUIDE.md            # Detailed setup instructions
 ├── README.md                 # This file
 │
-├── agents/                    # AI agents
+├── agents/                    # AI agents (orchestrators)
 │   ├── execution_agent.py    # Daily planning & tracking
 │   ├── stakeholder_discovery_agent.py  # Stakeholder analysis
 │   ├── strategy_agent.py     # Coming soon
@@ -156,6 +360,40 @@ See `.env.example` for all options.
 
 ---
 
+## Scheduling System
+
+### Schedule Architecture
+
+```python
+# Built on 'schedule' library
+
+schedule.every().day.at("08:00").do(workflow_function)
+schedule.every().monday.at("09:00").do(weekly_function)
+
+# Main loop
+while True:
+    schedule.run_pending()
+    time.sleep(60)  # Check every minute
+```
+
+### Default Schedule
+
+| Time | Workflow | Agent |
+|------|----------|-------|
+| 8:00 AM | Daily Plan | Execution |
+| 12:30 PM | Progress Check | Execution |
+| 5:30 PM | Daily Summary | Execution |
+| Friday 3:00 PM | Stakeholder Discovery | Stakeholder Discovery |
+
+Customize in `.env`:
+```bash
+EXECUTION_AGENT_MORNING_TIME=09:00
+EXECUTION_AGENT_MIDDAY_TIME=13:00
+EXECUTION_AGENT_EVENING_TIME=18:00
+```
+
+---
+
 ## Usage Examples
 
 ### Run in Dry Run Mode
@@ -184,39 +422,6 @@ python utils/ai_client.py
 # Test Google clients
 python utils/google/drive_client.py
 ```
-
----
-
-## Default Schedule
-
-| Time | Workflow | Agent |
-|------|----------|-------|
-| 8:00 AM | Daily Plan | Execution |
-| 12:30 PM | Progress Check | Execution |
-| 5:30 PM | Daily Summary | Execution |
-| Friday 3:00 PM | Stakeholder Discovery | Stakeholder Discovery |
-
-Customize in `.env`:
-```bash
-EXECUTION_AGENT_MORNING_TIME=09:00
-EXECUTION_AGENT_MIDDAY_TIME=13:00
-EXECUTION_AGENT_EVENING_TIME=18:00
-```
-
----
-
-## Integrations
-
-### Current
-- Google Workspace (Drive, Docs, Sheets, Slides, Calendar, Tasks)
-- Anthropic Claude (AI)
-- OpenAI GPT (AI alternative)
-
-### Coming Soon
-- Notion
-- Jira
-- Linear
-- Asana
 
 ---
 
@@ -261,38 +466,83 @@ Analyzed 15 documents, identified 8 stakeholders across 3 departments.
 
 ---
 
-## Customization
+## Integrations
 
-### Modify Agent Prompts
-Edit prompts in `agents/execution_agent.py`:
-```python
-prompt = f"""
-ROLE: Personal Chief of Staff
-CONTEXT: Planning optimal workday
+### Current
+- Google Workspace (Drive, Docs, Sheets, Slides, Calendar, Tasks)
+- Anthropic Claude (AI)
+- OpenAI GPT (AI alternative)
 
-# Add your customizations here
-"""
-```
+### Coming Soon
+- Notion
+- Jira
+- Linear
+- Asana
 
-### Add Custom Workflows
-In `main.py`:
-```python
-def run_custom_workflow(self):
-    """Your custom workflow"""
-    # Your code here
-    pass
+---
 
-# Schedule it
-schedule.every().day.at("10:00").do(self.run_custom_workflow)
-```
+## Deployment
 
-### Change AI Model
-In `.env`:
+### Option 1: Local Machine (Development)
 ```bash
-AI_MODEL=claude-opus-4-5-20251101  # For Claude
-# or
-AI_MODEL=gpt-4-turbo-preview  # For OpenAI
+python main.py
 ```
+
+**Pros**: Free, simple, full control
+**Cons**: Computer must stay on
+
+### Option 2: Cloud Server (Production)
+```
+AWS EC2 / DigitalOcean Droplet
+├── t2.micro instance ($5-10/month)
+├── Runs as systemd service
+└── Auto-restart on failure
+```
+
+### Option 3: Serverless (Advanced)
+```
+AWS Lambda + EventBridge
+├── Triggered by CloudWatch Events
+├── Pay per execution
+└── No server management
+```
+
+### Run in Background
+```bash
+# Using nohup (Linux/Mac)
+nohup python main.py > output.log 2>&1 &
+
+# Using screen (Linux/Mac)
+screen -S personal-os
+python main.py
+# Press Ctrl+A then D to detach
+```
+
+---
+
+## Security
+
+### Secrets Management
+
+```
+.env (Local Development)
+├── API Keys (encrypted at rest)
+├── Tokens (never committed to git)
+├── Google credentials path
+└── Personal data
+
+Production
+├── AWS Secrets Manager
+├── Environment variables
+└── Encrypted config files
+```
+
+### Best Practices
+- Never commit `.env` file (already in `.gitignore`)
+- Use environment variables for secrets
+- Rotate API keys regularly
+- Review logs for sensitive data before sharing
+- Use read-only permissions where possible
 
 ---
 
@@ -316,6 +566,26 @@ Log levels (set in `.env`):
 - `INFO` - Standard logging (default)
 - `WARNING` - Warnings only
 - `ERROR` - Errors only
+
+---
+
+## Error Handling
+
+### Error Flow
+
+```
+Error Occurs
+│
+├─→ Logged to file (logs/personal_os.log)
+│
+├─→ Alert generated (if critical)
+│
+└─→ Graceful degradation
+    │
+    ├─→ Retry (if transient)
+    ├─→ Skip (if non-critical)
+    └─→ Halt (if critical)
+```
 
 ---
 
@@ -346,61 +616,12 @@ See [SETUP_GUIDE.md](./SETUP_GUIDE.md) for more troubleshooting.
 
 ---
 
-## Deployment
-
-### Run Locally (Development)
-```bash
-python main.py
-```
-
-### Run in Background (Production)
-```bash
-# Using nohup (Linux/Mac)
-nohup python main.py > output.log 2>&1 &
-
-# Using screen (Linux/Mac)
-screen -S personal-os
-python main.py
-# Press Ctrl+A then D to detach
-
-# Using Windows Task Scheduler
-# See SETUP_GUIDE.md for instructions
-```
-
-### Deploy to Cloud
-- **AWS EC2**: Run on small instance with cron
-- **DigitalOcean Droplet**: Run as systemd service
-- **Heroku**: Deploy as worker dyno
-- **Railway/Render**: Deploy as background worker
-
----
-
-## Security
-
-### Best Practices
-- Never commit `.env` file (already in `.gitignore`)
-- Use environment variables for secrets
-- Rotate API keys regularly
-- Review logs for sensitive data before sharing
-- Use read-only permissions where possible
-
-### Secrets Management
-```bash
-# .env is gitignored
-# For team sharing, use:
-# - 1Password / LastPass
-# - AWS Secrets Manager
-# - HashiCorp Vault
-```
-
----
-
 ## Contributing
 
 ### Adding a New Agent
 
 1. Create agent file: `agents/your_agent.py`
-2. Implement agent class with methods
+2. Implement agent class following the pattern
 3. Add workflow in `main.py`
 4. Add schedule in `setup_schedules()`
 5. Test thoroughly
@@ -413,19 +634,17 @@ python main.py
 4. Document in README
 5. Add tests
 
----
-
-## Resources
-
-- [Detailed Setup Guide](./SETUP_GUIDE.md)
-- [Architecture Overview](./ARCHITECTURE.md)
-- [Agent Implementation Templates](./agents/)
+### Code Style
+- Python 3.9+
+- Type hints encouraged
+- Docstrings for all functions
+- Follow PEP 8
 
 ---
 
 ## Roadmap
 
-### Phase 1: Core Execution
+### Phase 1: Core Execution (Complete)
 - [x] Execution Agent
 - [x] Google Workspace integration
 - [x] AI client (Claude/OpenAI)
@@ -448,6 +667,25 @@ python main.py
 
 ---
 
+## Resources
+
+- [Detailed Setup Guide](./SETUP_GUIDE.md)
+- [Integration Guide](./INTEGRATION_GUIDE.md)
+- [Agent Implementation Templates](./agents/)
+
+---
+
+## Success Stories
+
+Once running, you can expect:
+- **30%+ time savings** on planning and status updates
+- **Better stakeholder relationships** with organized insights
+- **No missed priorities** with automated planning
+- **Consistent communication** with stakeholders
+- **More focus time** by automating routine tasks
+
+---
+
 ## License
 
 This is a personal productivity tool. Use and modify as needed for your own workflow.
@@ -461,17 +699,6 @@ For questions or issues:
 2. Review logs in `logs/personal_os.log`
 3. Test components individually
 4. Check `.env` configuration
-
----
-
-## Success Stories
-
-Once running, you can expect:
-- **30%+ time savings** on planning and status updates
-- **Better stakeholder relationships** with organized insights
-- **No missed priorities** with automated planning
-- **Consistent communication** with stakeholders
-- **More focus time** by automating routine tasks
 
 ---
 
