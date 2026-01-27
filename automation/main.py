@@ -9,7 +9,12 @@ from datetime import datetime
 from loguru import logger
 from config import settings, validate_configuration
 from agents.execution_agent import execution_agent
-from agents.stakeholder_discovery_agent import stakeholder_discovery_agent
+from agents.strategy_agent import strategy_agent
+from agents.discovery_agent import discovery_agent
+from agents.planning_agent import planning_agent
+from agents.stakeholder_agent import stakeholder_agent
+from agents.analytics_agent import analytics_agent
+from utils.messaging_client import messaging_client
 
 # Configure logging
 logger.add(
@@ -166,12 +171,22 @@ class PersonalOS:
         logger.info("Running strategy check workflow...")
 
         try:
-            # TODO: Implement strategy agent
-            logger.info("Strategy check placeholder - Coming soon!")
-            logger.info("Strategy check completed")
+            # Get current activities (placeholder - integrate with task system)
+            current_activities = self._get_current_activities()
+
+            # Generate alignment check
+            alignment_check = strategy_agent.generate_alignment_check(
+                current_activities=current_activities
+            )
+
+            # Send to messaging
+            strategy_agent.send_alignment_check_to_messaging(alignment_check)
+
+            logger.info("Strategy check completed successfully")
 
         except Exception as e:
             logger.error(f"Error in strategy check: {e}")
+            self._send_error_alert("Strategy Check", str(e))
 
     # ==================== Stakeholder Agent Jobs ====================
 
@@ -180,18 +195,26 @@ class PersonalOS:
         logger.info("Running weekly stakeholder discovery workflow...")
 
         try:
-            # Run discovery on recent notes
-            report = stakeholder_discovery_agent.analyze_recent_notes(
-                days=7,
-                report_title=f"Weekly Stakeholder Discovery - {datetime.now().strftime('%Y-%m-%d')}",
+            # Get weekly data (placeholder - integrate with task/project system)
+            accomplishments = self._get_weekly_accomplishments()
+            challenges = self._get_weekly_challenges()
+            next_week = self._get_next_week_priorities()
+
+            # Generate update
+            update = stakeholder_agent.generate_weekly_update(
+                accomplishments=accomplishments,
+                challenges=challenges,
+                next_week=next_week
             )
 
-            logger.info(f"Stakeholder discovery completed")
-            logger.info(f"Report: {report.google_doc_url or 'Not saved'}")
-            logger.info(f"Stakeholders analyzed: {len(report.stakeholder_profiles)}")
+            # Send to messaging
+            stakeholder_agent.send_weekly_update_to_messaging(update)
+
+            logger.info("Weekly status update completed successfully")
 
         except Exception as e:
-            logger.error(f"Error in stakeholder discovery: {e}")
+            logger.error(f"Error in weekly status update: {e}")
+            self._send_error_alert("Weekly Status Update", str(e))
 
     # ==================== Discovery Agent Jobs ====================
 
@@ -200,12 +223,22 @@ class PersonalOS:
         logger.info("Running feedback digest workflow...")
 
         try:
-            # TODO: Implement discovery agent
-            logger.info("Feedback digest placeholder - Coming soon!")
-            logger.info("Feedback digest completed")
+            # Get feedback data (placeholder - integrate with feedback sources)
+            feedback_items = self._get_recent_feedback()
+
+            # Generate digest
+            digest = discovery_agent.generate_feedback_digest(
+                feedback_items=feedback_items
+            )
+
+            # Send to messaging
+            discovery_agent.send_feedback_digest_to_messaging(digest)
+
+            logger.info("Feedback digest completed successfully")
 
         except Exception as e:
             logger.error(f"Error in feedback digest: {e}")
+            self._send_error_alert("Feedback Digest", str(e))
 
     # ==================== Helper Methods ====================
 
@@ -242,36 +275,61 @@ class PersonalOS:
         try:
             from utils.google.tasks_client import tasks_client
 
-            tasks = tasks_client.get_pending_tasks()
-            formatted_tasks = []
+    def _get_current_activities(self):
+        """Fetch current activities for strategy alignment"""
+        # TODO: Integrate with task/project system
+        # Placeholder implementation
+        return [
+            "Working on Feature X PRD",
+            "User interview analysis",
+            "Sprint planning preparation",
+        ]
 
-            for task in tasks:
-                formatted_tasks.append({
-                    "title": task.get("title", "Untitled"),
-                    "deadline": task.get("due", "No deadline"),
-                    "priority": "Medium",
-                    "estimate": "Unknown",
-                })
+    def _get_weekly_accomplishments(self):
+        """Fetch weekly accomplishments"""
+        # TODO: Integrate with task/project system
+        # Placeholder implementation
+        return [
+            "Completed user research for Feature X",
+            "Shipped bug fixes for onboarding",
+            "Finalized Q2 roadmap",
+        ]
 
-            return formatted_tasks
+    def _get_weekly_challenges(self):
+        """Fetch weekly challenges"""
+        # TODO: Integrate with task/project system
+        # Placeholder implementation
+        return [
+            {"issue": "API latency issues", "mitigation": "Working with backend team"},
+        ]
 
-        except Exception as e:
-            logger.warning(f"Could not fetch tasks: {e}")
-            # Return placeholder data
-            return [
-                {
-                    "title": "Complete PRD for Feature X",
-                    "deadline": "Friday",
-                    "priority": "High",
-                    "estimate": "4 hours"
-                },
-                {
-                    "title": "Review design mockups",
-                    "deadline": "Today",
-                    "priority": "High",
-                    "estimate": "1 hour"
-                },
-            ]
+    def _get_next_week_priorities(self):
+        """Fetch next week priorities"""
+        # TODO: Integrate with task/project system
+        # Placeholder implementation
+        return [
+            "Launch Feature X beta",
+            "Complete sprint planning",
+            "Customer feedback review",
+        ]
+
+    def _get_recent_feedback(self):
+        """Fetch recent customer feedback"""
+        # TODO: Integrate with feedback sources (Zendesk, Intercom, etc.)
+        # Placeholder implementation
+        return [
+            {"type": "Feature Request", "content": "Need dark mode", "source": "Support"},
+            {"type": "Bug", "content": "Slow loading on dashboard", "source": "App Store"},
+            {"type": "Praise", "content": "Love the new onboarding!", "source": "Email"},
+        ]
+
+    def _send_error_alert(self, workflow_name: str, error_message: str):
+        """Send an error alert to Slack"""
+        messaging_client.send_alert(
+            title=f"Error in {workflow_name}",
+            message=f"An error occurred:\n```{error_message}```",
+            severity="error"
+        )
 
     def run(self):
         """Start the Personal OS automation loop"""
