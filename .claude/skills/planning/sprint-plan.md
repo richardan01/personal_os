@@ -1,20 +1,62 @@
-# Sprint Planning Agent
+# Sprint Planning
 
-You are the **Planning Agent** from Personal OS - focused on backlog and sprint management for Richard Constantine, a Product Manager.
+## Purpose
 
-## Your Capabilities
+Plan and organize sprints for maximum delivery and impact, with realistic commitments and clear dependencies.
 
-- User story creation and refinement
-- Backlog prioritization (RICE, MoSCoW, Kano)
-- Sprint planning assistance
-- Dependency mapping
-- Capacity planning
+## Inputs Required
 
-## Your Task
+- **Team capacity**: Team size, sprint length, available points/hours
+- **Backlog items**: Stories/tasks to consider for the sprint
+- **Dependencies**: Known blockers and cross-team dependencies
+- **Context**: OKRs and priorities from `@context:agents/_shared/context`
 
-Help plan and organize sprints for maximum delivery and impact.
+## Instructions
 
-## Output Format for Sprint Planning
+1. **Gather Information**
+   - Ask about team size and sprint length
+   - Ask about velocity/capacity (points or hours)
+   - Gather backlog items to consider
+   - Identify any known dependencies or constraints
+
+2. **Calculate Capacity**
+   - Determine gross capacity
+   - Apply 20% buffer for unknowns
+   - Calculate net committable capacity
+
+3. **Prioritize Items**
+   - Apply appropriate framework (RICE, MoSCoW, etc.)
+   - Categorize into P0 (Must), P1 (Should), P2 (Stretch)
+   - Ensure total doesn't exceed capacity
+
+4. **Map Dependencies**
+   - Identify cross-team dependencies
+   - Find technical dependencies
+   - Flag blocking items
+   - Determine critical path
+
+5. **Define Success**
+   - Write one clear, measurable sprint goal
+   - Define key milestones
+   - Set success criteria
+
+## Prioritization Frameworks
+
+**RICE Score** = (Reach x Impact x Confidence) / Effort
+- Reach: Users affected (1-10)
+- Impact: How much it matters (0.25, 0.5, 1, 2, 3)
+- Confidence: How sure (0.5, 0.8, 1)
+- Effort: Person-weeks
+
+**MoSCoW**:
+- Must have: Critical for sprint goal
+- Should have: Important but not critical
+- Could have: Nice to have
+- Won't have: Out of scope
+
+## Output Format
+
+Reference: `@template:skills/_shared/output-formats#sprint-plan-template`
 
 ```markdown
 ## Sprint Plan - Sprint [X] ([Date Range])
@@ -25,31 +67,36 @@ Help plan and organize sprints for maximum delivery and impact.
 ### Capacity
 - Team Size: [X developers]
 - Sprint Length: [X days/weeks]
-- Available Points/Hours: [X]
+- Gross Capacity: [X points/hours]
 - Buffer (20%): [X]
-- **Committable Capacity**: [X]
+- **Net Committable**: [X]
 
 ### Committed Items
 
-#### Must Complete (P0)
+#### P0 - Must Complete
 | Story | Points | Owner | Dependencies |
 |-------|--------|-------|--------------|
-| [Story 1] | [X] | [Name] | [None/Blocked by] |
+| [Story] | [X] | [Name] | [None/Blocked by] |
 
-#### Should Complete (P1)
-| Story | Points | Owner | Dependencies |
-|-------|--------|-------|--------------|
-
-#### Stretch Goals (P2)
+#### P1 - Should Complete
 | Story | Points | Owner | Dependencies |
 |-------|--------|-------|--------------|
 
-### Total Committed: [X points]
+#### P2 - Stretch Goals
+| Story | Points | Owner | Dependencies |
+|-------|--------|-------|--------------|
+
+### Total Committed: [X points] / [Net Capacity]
 
 ### Dependencies & Risks
 | Dependency | Owner | Status | Risk Level |
 |------------|-------|--------|------------|
 | [Item] | [Who] | [Status] | [H/M/L] |
+
+### Key Milestones
+- Day [X]: [Milestone]
+- Day [Y]: [Milestone]
+- Final Day: Sprint Review
 
 ### Definition of Done
 - [ ] Code complete and reviewed
@@ -57,37 +104,16 @@ Help plan and organize sprints for maximum delivery and impact.
 - [ ] Documentation updated
 - [ ] Product sign-off
 
-### Key Milestones
-- Day [X]: [Milestone]
-- Day [Y]: [Milestone]
-- Day [Z]: Sprint Review
-
 ### Success Criteria
-By end of sprint, we will have:
-1. [Measurable outcome 1]
-2. [Measurable outcome 2]
+By end of sprint:
+1. [Measurable outcome]
+2. [Measurable outcome]
 ```
 
-## Prioritization Frameworks
+## Quality Checks
 
-When asked to prioritize, apply:
-
-**RICE Score** = (Reach x Impact x Confidence) / Effort
-- Reach: How many users affected (1-10)
-- Impact: How much it matters (0.25, 0.5, 1, 2, 3)
-- Confidence: How sure are we (0.5, 0.8, 1)
-- Effort: Person-weeks
-
-**MoSCoW**:
-- Must have: Critical for launch
-- Should have: Important but not critical
-- Could have: Nice to have
-- Won't have: Out of scope for now
-
-## Instructions
-
-1. Ask about team capacity and sprint length
-2. Gather the backlog items to consider
-3. Help prioritize using appropriate frameworks
-4. Watch for overcommitment - leave 20% buffer
-5. Ensure clear ownership and dependencies are mapped
+- [ ] Total commitment does not exceed net capacity
+- [ ] Sprint goal is clear and measurable
+- [ ] Dependencies are mapped and owners assigned
+- [ ] P0 items are truly critical
+- [ ] 20% buffer is maintained

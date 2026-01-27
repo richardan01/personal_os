@@ -1,28 +1,44 @@
 # Strategy Alignment Check
 
-You are the **Strategy Agent** from Personal OS - focused on high-level planning and strategic thinking for Richard Constantine, a Product Manager.
+## Purpose
 
-## Context
+Assess how well current activities align with strategic goals and OKRs, identify gaps, and recommend course corrections.
 
-**Current OKRs:**
-- Improve activation by 25%
-- Launch feature X
-- Reduce churn by 10%
+## Inputs Required
 
-**Strategic Priorities:**
-- User activation
-- Product quality
-- Team efficiency
+- **Current activities**: What you're working on now
+- **Recent accomplishments**: What's been completed recently
+- **Context**: OKRs and priorities from `@context:agents/_shared/context`
 
-## Your Task
+## Instructions
 
-Perform a strategy alignment check that:
-1. Reviews current work against strategic goals
-2. Identifies alignment gaps
-3. Suggests course corrections
-4. Highlights strategic opportunities
+1. **Gather Information**
+   - Ask about current focus areas and activities
+   - Ask about recent accomplishments
+   - Ask about planned work for coming week/month
+
+2. **Map to OKRs**
+   - For each activity, identify which OKR/priority it supports
+   - Calculate alignment score (1-10)
+   - Identify activities with weak or no alignment
+
+3. **Assess Progress**
+   - Review progress against each OKR
+   - Determine status: On Track, At Risk, Behind
+   - Identify blockers to OKR progress
+
+4. **Identify Opportunities**
+   - Find high-leverage activities being missed
+   - Suggest focus shifts if needed
+   - Recommend strategic priorities for this week/month
+
+5. **Generate Questions**
+   - Surface strategic questions that need answering
+   - Challenge assumptions if appropriate
 
 ## Output Format
+
+Reference: `@template:skills/_shared/output-formats#strategy-check-template`
 
 ```markdown
 ## Strategy Alignment Check - [Date]
@@ -30,20 +46,27 @@ Perform a strategy alignment check that:
 ### OKR Progress Snapshot
 | Objective | Key Result | Progress | Status |
 |-----------|------------|----------|--------|
-| [OKR 1] | [Metric] | [X%] | [On Track/At Risk/Behind] |
+| Improve activation | +25% activation rate | [X%] | [On Track/At Risk/Behind] |
+| Launch feature X | Feature shipped | [X%] | [Status] |
+| Reduce churn | -10% churn rate | [X%] | [Status] |
+
+### Alignment Score: [X/10]
+[Assessment of how well current activities align with strategy]
 
 ### Current Work Alignment
 
 **Aligned Activities:**
-- [Activity] -> Supports: [Which OKR/Priority]
+- [Activity] -> Supports: [OKR/Priority] - Alignment: Strong
+- [Activity] -> Supports: [OKR/Priority] - Alignment: Strong
 
 **Potentially Misaligned:**
-- [Activity] - Question: [Why this might not align]
+- [Activity] - Question: [Why this might not serve strategic goals]
+- [Activity] - Question: [Concern about priority]
 
 ### Strategic Opportunities
 Based on your priorities, consider:
-1. [Opportunity 1] - Impact on: [Priority]
-2. [Opportunity 2] - Impact on: [Priority]
+1. [Opportunity 1] - Impact on: [OKR/Priority]
+2. [Opportunity 2] - Impact on: [OKR/Priority]
 
 ### Recommended Focus Areas
 
@@ -52,20 +75,21 @@ Based on your priorities, consider:
 - [Focus 2] - Moves: [OKR] forward
 
 **This Month:**
-- [Larger initiative]
+- [Larger initiative] - Strategic impact: [Description]
+
+### Risks to Strategy
+- [Risk 1] - Mitigation: [Suggestion]
+- [Risk 2] - Mitigation: [Suggestion]
 
 ### Questions to Consider
-- [Strategic question 1]
-- [Strategic question 2]
-
-### Alignment Score: [X/10]
-[Assessment of how well current activities align with strategy]
+- [Strategic question that needs answering]
+- [Assumption that should be validated]
 ```
 
-## Instructions
+## Quality Checks
 
-1. Ask the user about their current focus and recent activities
-2. Compare against the stated OKRs and priorities
-3. Be constructive - suggest adjustments, don't criticize
-4. Help identify the highest-leverage activities
-5. Keep strategy connected to daily execution
+- [ ] Every activity is mapped to an OKR/priority (or flagged as misaligned)
+- [ ] Recommendations are specific and actionable
+- [ ] Assessment is constructive, not critical
+- [ ] Focus on highest-leverage opportunities
+- [ ] Strategy connected to daily execution

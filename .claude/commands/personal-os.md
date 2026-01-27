@@ -1,108 +1,61 @@
-# Personal OS - Command Center
+# /personal-os
 
-You are the **Personal OS** for Richard Constantine, a Product Manager. You help coordinate all agents and workflows for maximum productivity.
+> Personal OS Command Center - your AI-powered productivity hub.
 
-## Architecture
+## Quick Start
 
-Personal OS uses a two-layer architecture:
+Based on time of day:
+- **Morning**: `/daily-plan` - Plan your day
+- **Midday**: `/progress-check` - Assess and adjust
+- **Evening**: `/daily-summary` - Wrap up
 
-**Agents** - Autonomous workflow orchestrators that can be triggered by time or events
-**Skills** - Reusable capabilities that agents use to accomplish tasks
+## Available Commands
 
-## Available Agents
+### Execution
+| Command | Description |
+|---------|-------------|
+| `/daily-plan` | Generate morning daily plan |
+| `/progress-check` | Mid-day progress assessment |
+| `/daily-summary` | End-of-day summary |
+
+### Planning
+| Command | Description |
+|---------|-------------|
+| `/sprint-plan` | Sprint planning and prioritization |
+| `/strategy-check` | OKR alignment check |
+
+### Research
+| Command | Description |
+|---------|-------------|
+| `/discovery` | User research synthesis |
+
+### Communication
+| Command | Description |
+|---------|-------------|
+| `/stakeholder-update` | Status reports for any audience |
+
+## Agents
 
 Invoke agents with `@agent-name`:
 
-| Agent | Purpose | Trigger |
-|-------|---------|---------|
-| `@execution-agent` | Daily operations, planning, tracking | Morning/Midday/Evening |
-| `@strategy-agent` | OKR alignment, strategic planning | Daily/Weekly |
-| `@discovery-agent` | User research, feedback synthesis | Daily |
-| `@planning-agent` | Sprint planning, prioritization | Weekly |
-| `@stakeholder-agent` | Status updates, communication | Weekly |
-| `@analytics-agent` | Metrics, A/B tests, data insights | Daily |
-| `@documentation-agent` | PRDs, decision logs, knowledge base | On-demand |
-| `@learning-agent` | Continuous improvement, learning | Daily/Weekly |
-| `@product-manager` | Full PM capabilities | On-demand |
+| Agent | Purpose |
+|-------|---------|
+| `@execution-agent` | Daily operations |
+| `@strategy-agent` | Strategic planning |
+| `@discovery-agent` | User research |
+| `@planning-agent` | Sprint planning |
+| `@stakeholder-agent` | Communications |
+| `@analytics-agent` | Data & metrics |
+| `@documentation-agent` | Knowledge management |
+| `@learning-agent` | Continuous improvement |
+| `@product-manager` | Full PM capabilities |
 
-## Available Skills
-
-Invoke skills with `/skill-name`:
-
-### Execution Skills
-- `/daily-plan` - Generate morning daily execution plan
-- `/progress-check` - Mid-day progress assessment
-- `/daily-summary` - End-of-day summary and tomorrow prep
-
-### Planning Skills
-- `/strategy-check` - Align work with OKRs and priorities
-- `/sprint-plan` - Plan and prioritize sprint work
-
-### Research Skills
-- `/discovery` - Synthesize user research and feedback
-
-### Communication Skills
-- `/stakeholder-update` - Generate status reports for any audience
-
-## Quick Actions
-
-Based on time of day:
-- **Morning (before 10am)**: `/daily-plan` or `@execution-agent`
-- **Midday (11am-2pm)**: `/progress-check`
-- **Afternoon (2pm-5pm)**: `/sprint-plan` or `/discovery`
-- **Evening (after 5pm)**: `/daily-summary`
-
-## Current Configuration
+## Architecture
 
 ```
-User: Richard Constantine (Product Manager)
-Company: Your Company
-
-OKRs:
-- Improve activation by 25%
-- Launch feature X
-- Reduce churn by 10%
-
-Strategic Priorities:
-- User activation
-- Product quality
-- Team efficiency
+Commands → route to → Agents → execute → Skills
+                         ↓
+                   Shared Context
 ```
 
-## Folder Structure
-
-```
-.claude/
-├── agents/              # Agent definitions (8 agents)
-│   ├── execution-agent.md
-│   ├── strategy-agent.md
-│   ├── discovery-agent.md
-│   ├── planning-agent.md
-│   ├── stakeholder-agent.md
-│   ├── analytics-agent.md
-│   ├── documentation-agent.md
-│   ├── learning-agent.md
-│   └── product-manager.md
-│
-├── skills/              # Reusable skill definitions
-│   ├── execution/       # daily-plan, progress-check, daily-summary
-│   ├── planning/        # strategy-check, sprint-plan
-│   ├── research/        # discovery
-│   ├── communication/   # stakeholder-update
-│   ├── analytics/       # (coming soon)
-│   └── decision/        # (coming soon)
-│
-└── commands/
-    └── personal-os.md   # This file - command center
-```
-
-## How to Help
-
-1. If user is unsure, ask about their current need
-2. Recommend the most appropriate agent or skill
-3. Offer to invoke it for them
-4. Explain the difference between agents and skills if asked
-
-## Your Role
-
-You are the orchestrator. Help users navigate to the right agent or skill and ensure they're getting maximum value from their Personal OS.
+All agents reference shared context from `agents/_shared/context.md` for consistent user info, OKRs, and priorities.

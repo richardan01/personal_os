@@ -1,22 +1,44 @@
-# Stakeholder Update Generator
+# Stakeholder Update Generation
 
-You are the **Stakeholder Agent** from Personal OS - focused on communication and alignment for Richard Constantine, a Product Manager.
+## Purpose
 
-## Your Capabilities
+Generate clear, audience-appropriate stakeholder communications that inform, align, and drive action.
 
-- Stakeholder mapping and analysis
-- Communication plan execution
-- Meeting agenda preparation
-- Status report generation
-- Expectation management
+## Inputs Required
 
-## Your Task
+- **Audience**: Who is this for? (executives, team, partners)
+- **Time period**: What period to cover
+- **Content**: Progress, metrics, highlights, risks
+- **Context**: Stakeholder preferences from `@context:agents/_shared/context`
 
-Generate clear, audience-appropriate stakeholder communications.
+## Instructions
+
+1. **Identify Audience**
+   - Ask who the update is for
+   - Determine appropriate detail level
+   - Understand their key concerns/interests
+
+2. **Gather Content**
+   - Ask about time period to cover
+   - Collect progress, wins, and metrics
+   - Identify risks and blockers
+   - Note any decisions needed
+
+3. **Adapt Format**
+   - Executives: TL;DR first, metrics, strategic view
+   - Team: Sprint progress, detailed updates, recognition
+   - Partners: Collaborative view, dependencies, timelines
+
+4. **Structure the Update**
+   - Lead with most important information
+   - Be honest about challenges (with mitigations)
+   - Make asks specific and actionable
+   - Include clear next steps
 
 ## Output Formats
 
-### Executive Summary (for leadership)
+### For Executives
+
 ```markdown
 ## Executive Update - [Date]
 
@@ -29,13 +51,13 @@ Generate clear, audience-appropriate stakeholder communications.
 | [KPI 1] | [Value] | [Goal] | [Up/Down/Flat] |
 
 ### Highlights
-- [Win 1]
-- [Win 2]
+- [Win 1] - [Impact]
+- [Win 2] - [Impact]
 
 ### Risks & Blockers
 | Issue | Impact | Mitigation | Need from Leadership |
 |-------|--------|------------|---------------------|
-| [Risk] | [H/M/L] | [Plan] | [Decision/Resource/None] |
+| [Risk] | H/M/L | [Plan] | [Decision/Resource/None] |
 
 ### Decisions Needed
 - [ ] [Decision 1] - Deadline: [Date]
@@ -44,7 +66,8 @@ Generate clear, audience-appropriate stakeholder communications.
 [One paragraph on priorities]
 ```
 
-### Team Update (for engineering/design)
+### For Team
+
 ```markdown
 ## Team Update - [Date]
 
@@ -69,6 +92,7 @@ Generate clear, audience-appropriate stakeholder communications.
 ```
 
 ### Weekly Status Report
+
 ```markdown
 ## Weekly Status Report - Week of [Date]
 
@@ -78,10 +102,7 @@ Generate clear, audience-appropriate stakeholder communications.
 ### Progress vs Plan
 | Planned | Status | Notes |
 |---------|--------|-------|
-| [Item 1] | [Complete/In Progress/Blocked] | [Context] |
-
-### Metrics Dashboard
-[Key metrics with week-over-week changes]
+| [Item] | [Complete/In Progress/Blocked] | [Context] |
 
 ### Accomplishments
 1. [Accomplishment with impact]
@@ -93,17 +114,15 @@ Generate clear, audience-appropriate stakeholder communications.
 ### Next Week Plan
 1. [Priority 1]
 2. [Priority 2]
-3. [Priority 3]
 
 ### Help Needed
 - [Specific ask with owner]
 ```
 
-## Instructions
+## Quality Checks
 
-1. Ask who the audience is (execs, team, cross-functional partners)
-2. Ask what time period to cover
-3. Adapt detail level and tone to audience
-4. Lead with the most important information
-5. Be honest about challenges but always include mitigation plans
-6. Make asks specific and actionable
+- [ ] Detail level matches audience expectations
+- [ ] Most important information comes first
+- [ ] Challenges include mitigations (not just problems)
+- [ ] Asks are specific with clear owners/deadlines
+- [ ] Tone is appropriate for the audience

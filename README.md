@@ -1,91 +1,191 @@
 # Personal OS for Product Management
 
-> Automate your product management workflows with AI-powered agents that help you plan, execute, and communicate more effectively.
+> AI-powered productivity system with specialized agents that help you plan, execute, and communicate more effectively.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### **Start here:**
+Run `/personal-os` to see all available commands, or use these directly:
 
-1. **[Claude CLI Commands](./.claude/commands/)** ⭐ - Run agents directly via `/command` in your Claude desktop app.
-2. **[QUICK_START.md](./QUICK_START.md)** - Setup guide for full Python automation (Slack/Notion integration).
-
----
-
-## 📦 What's Inside
-
-### ✅ **Claude CLI Integration**
-
-- Use `/daily-plan`, `/daily-summary`, `/discovery`, and more directly in your chat.
-- Pre-configured for Product Management workflows.
-
-### ✅ **Python Automation System** (Optional)
-
-- 📋 Daily plan at 8:00 AM
-- 📊 Progress check at 12:30 PM
-- 🌟 Daily summary at 5:30 PM
-- All delivered to Slack automatically!
+| Time | Command | What it does |
+|------|---------|--------------|
+| Morning | `/daily-plan` | Plan your day |
+| Midday | `/progress-check` | Assess and adjust |
+| Evening | `/daily-summary` | Wrap up and prep tomorrow |
 
 ---
 
-## 🎯 Two Ways to Use This
-
-### Option 1: Claude CLI Mode (Instant)
-
-Use the powered-up commands directly in your Claude Desktop app.
-
-- No complex setup required.
-- Human-in-the-loop control.
-- **Start here:** [./.claude/commands/](./.claude/commands/)
-
-### Option 2: Full Automation (30 minutes)
-
-Set up automated background workflows that run on schedule and push to Slack/Notion.
-
-- Hands-free operation.
-- Multi-tool integration.
-- **Start here:** [QUICK_START.md](./QUICK_START.md)
-
----
-
-## 📁 File Structure
+## Architecture
 
 ```
-Personal-OS/
-├── README.md (this file)
-├── QUICK_START.md          # Automation setup guide
-├── personal-os-design.md   # System design & architecture
+┌─────────────────────────────────────────────────────────────┐
+│                        COMMANDS                              │
+│  Thin routers (~15 lines) that connect users to the system  │
+│                                                              │
+│  /daily-plan  /progress-check  /discovery  /strategy-check  │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│                         AGENTS                               │
+│     Personas with interaction styles and skill routing       │
+│                                                              │
+│  @execution-agent   @strategy-agent    @discovery-agent     │
+│  @planning-agent    @stakeholder-agent @analytics-agent     │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+            ┌─────────────┼─────────────┐
+            ▼             ▼             ▼
+┌───────────────┐ ┌─────────────┐ ┌─────────────────┐
+│    SKILLS     │ │   SHARED    │ │     OUTPUT      │
+│  Pure "how    │ │   CONTEXT   │ │    FORMATS      │
+│  to" guides   │ │  OKRs, user │ │   Templates     │
+│               │ │  priorities │ │                 │
+└───────────────┘ └─────────────┘ └─────────────────┘
+```
+
+### Design Principles
+
+| Principle | Implementation |
+|-----------|----------------|
+| **Single source of truth** | All user context in `agents/_shared/context.md` |
+| **Skills are stateless** | No persona, just instructions - any agent can use |
+| **Agents orchestrate** | Know which skills to use, when to hand off |
+| **Commands route** | Minimal logic, connect user to agent+skill |
+| **Loose coupling** | Skills reusable across agents |
+
+---
+
+## Available Commands
+
+### Execution (Daily Operations)
+| Command | Description | Agent |
+|---------|-------------|-------|
+| `/daily-plan` | Morning planning | @execution-agent |
+| `/progress-check` | Midday assessment | @execution-agent |
+| `/daily-summary` | Evening wrap-up | @execution-agent |
+
+### Planning
+| Command | Description | Agent |
+|---------|-------------|-------|
+| `/sprint-plan` | Sprint planning | @planning-agent |
+| `/strategy-check` | OKR alignment | @strategy-agent |
+
+### Research
+| Command | Description | Agent |
+|---------|-------------|-------|
+| `/discovery` | User research synthesis | @discovery-agent |
+
+### Communication
+| Command | Description | Agent |
+|---------|-------------|-------|
+| `/stakeholder-update` | Status reports | @stakeholder-agent |
+
+---
+
+## Agents
+
+Each agent has a specific persona and orchestrates related skills:
+
+| Agent | Purpose | Model |
+|-------|---------|-------|
+| `@execution-agent` | Daily operations, productivity | Sonnet |
+| `@strategy-agent` | OKRs, strategic alignment | Opus |
+| `@discovery-agent` | User research, feedback | Sonnet |
+| `@planning-agent` | Sprints, prioritization | Sonnet |
+| `@stakeholder-agent` | Communications, updates | Sonnet |
+| `@analytics-agent` | Metrics, experiments | Sonnet |
+| `@documentation-agent` | PRDs, knowledge base | Sonnet |
+| `@learning-agent` | Growth, retrospectives | Haiku |
+| `@product-manager` | Full PM capabilities | Opus |
+
+---
+
+## File Structure
+
+```
+.claude/
+├── commands/                    # Thin routers (~15 lines each)
+│   ├── personal-os.md          # Main hub
+│   ├── daily-plan.md           # → @execution-agent
+│   ├── progress-check.md       # → @execution-agent
+│   ├── daily-summary.md        # → @execution-agent
+│   ├── sprint-plan.md          # → @planning-agent
+│   ├── strategy-check.md       # → @strategy-agent
+│   ├── discovery.md            # → @discovery-agent
+│   └── stakeholder-update.md   # → @stakeholder-agent
 │
-├── .claude/                # Claude Desktop Integration
-│   └── commands/           # Slash commands (/daily-plan, etc.)
+├── agents/                      # Personas + skill orchestration
+│   ├── _shared/
+│   │   └── context.md          # User profile, OKRs, priorities
+│   ├── execution-agent.md
+│   ├── strategy-agent.md
+│   ├── discovery-agent.md
+│   ├── planning-agent.md
+│   ├── stakeholder-agent.md
+│   ├── analytics-agent.md
+│   ├── documentation-agent.md
+│   ├── learning-agent.md
+│   └── product-manager.md      # Swiss Army knife fallback
 │
-└── automation/             # Python automation engine
-    ├── main.py
-    ├── config.py
-    └── requirements.txt
+└── skills/                      # Pure instructions (persona-free)
+    ├── _shared/
+    │   └── output-formats.md   # Shared templates
+    ├── execution/
+    │   ├── daily-plan.md
+    │   ├── progress-check.md
+    │   └── daily-summary.md
+    ├── planning/
+    │   ├── sprint-plan.md
+    │   └── strategy-check.md
+    ├── research/
+    │   └── discovery.md
+    └── communication/
+        └── stakeholder-update.md
 ```
 
 ---
 
-## 🚀 How to Execute Workflows
+## Customization
 
-### Via Claude CLI (Recommended)
+### Update Your Context
 
-Simply type the slash command in your Claude chat:
+Edit `.claude/agents/_shared/context.md` to customize:
+- Your name and role
+- Current OKRs
+- Strategic priorities
+- Working style preferences
+- Key stakeholders
 
-- `/daily-plan` - Plan your day
-- `/daily-summary` - Wrap up and prepare for tomorrow
-- `/discovery` - Analyze user feedback
-- `/strategy-check` - Align with OKRs
+This file is the single source of truth - all agents reference it.
 
-### Via Python Automation
+### Add New Skills
 
-1. Navigate to the automation folder: `cd automation`
-2. Install dependencies: `pip install -r requirements.txt`
-3. Configure your API keys in `.env`
-4. Run: `python main.py`
+1. Create a new file in the appropriate `skills/` subdirectory
+2. Follow the skill template (Purpose, Inputs, Instructions, Output Format, Quality Checks)
+3. Add it to the relevant agent's "Skills I Orchestrate" table
+4. Optionally create a command that routes to it
 
 ---
 
-**Built with ❤️ for Product Managers who want to focus on building great products, not managing tasks.**
+## Python Automation (Optional)
+
+For automated background workflows:
+
+```
+automation/
+├── main.py
+├── config.py
+└── requirements.txt
+```
+
+Setup:
+1. `cd automation`
+2. `pip install -r requirements.txt`
+3. Configure API keys in `.env`
+4. `python main.py`
+
+---
+
+**Built for Product Managers who want to focus on building great products, not managing tasks.**
