@@ -9,7 +9,7 @@ from datetime import datetime
 from loguru import logger
 from config import settings, validate_configuration
 from agents.execution_agent import execution_agent
-from utils.messaging_client import messaging_client
+from agents.stakeholder_discovery_agent import stakeholder_discovery_agent
 
 # Configure logging
 logger.add(
@@ -71,7 +71,7 @@ class PersonalOS:
             # Weekly status update
             day, time_str = settings.stakeholder_agent_weekly_update_time.split()
             getattr(schedule.every(), day.lower()).at(time_str).do(
-                self.run_weekly_status_update
+                self.run_weekly_stakeholder_discovery
             )
             logger.info(f"Scheduled weekly update at {settings.stakeholder_agent_weekly_update_time}")
 
@@ -90,8 +90,7 @@ class PersonalOS:
         logger.info("Running morning daily plan workflow...")
 
         try:
-            # TODO: Integrate with actual calendar and task system
-            # For now, using placeholder data
+            # Get calendar events from Google Calendar
             calendar_events = self._get_todays_calendar_events()
             open_tasks = self._get_open_tasks()
 
@@ -101,14 +100,13 @@ class PersonalOS:
                 open_tasks=open_tasks,
             )
 
-            # Send to messaging platforms
-            execution_agent.send_daily_plan_to_messaging(plan)
+            # Log the plan (output via Google Docs or other method)
+            logger.info(f"Daily Plan Generated:\n{plan}")
 
             logger.info("Morning daily plan completed successfully")
 
         except Exception as e:
             logger.error(f"Error in morning daily plan: {e}")
-            self._send_error_alert("Morning Daily Plan", str(e))
 
     def run_midday_progress_check(self):
         """Generate and send midday progress check"""
@@ -116,7 +114,6 @@ class PersonalOS:
 
         try:
             # TODO: Track actual progress during the day
-            # For now, using placeholder data
             morning_plan = "Check your morning plan for context"
             completed = ["Completed task 1", "Completed task 2"]
             in_progress = ["Working on task 3"]
@@ -130,22 +127,17 @@ class PersonalOS:
                 pending_tasks=pending,
             )
 
-            # Send to messaging platforms
-            execution_agent.send_progress_check_to_messaging(progress)
-
+            logger.info(f"Progress Check:\n{progress}")
             logger.info("Midday progress check completed successfully")
 
         except Exception as e:
             logger.error(f"Error in midday progress check: {e}")
-            self._send_error_alert("Midday Progress Check", str(e))
 
     def run_evening_summary(self):
         """Generate and send evening summary"""
         logger.info("Running evening summary workflow...")
 
         try:
-            # TODO: Collect actual day's data
-            # For now, using placeholder data
             morning_plan = "Check morning plan for context"
             completed = ["Completed priority 1", "Completed priority 2"]
             incomplete = ["Priority 3 - partially done"]
@@ -161,14 +153,11 @@ class PersonalOS:
                 blockers=blockers,
             )
 
-            # Send to messaging platforms
-            execution_agent.send_daily_summary_to_messaging(summary)
-
+            logger.info(f"Daily Summary:\n{summary}")
             logger.info("Evening summary completed successfully")
 
         except Exception as e:
             logger.error(f"Error in evening summary: {e}")
-            self._send_error_alert("Evening Summary", str(e))
 
     # ==================== Strategy Agent Jobs ====================
 
@@ -178,9 +167,7 @@ class PersonalOS:
 
         try:
             # TODO: Implement strategy agent
-            message = "🎯 Strategy check placeholder - Coming soon!"
-            messaging_client.send_dm(message)
-
+            logger.info("Strategy check placeholder - Coming soon!")
             logger.info("Strategy check completed")
 
         except Exception as e:
@@ -188,19 +175,23 @@ class PersonalOS:
 
     # ==================== Stakeholder Agent Jobs ====================
 
-    def run_weekly_status_update(self):
-        """Generate and send weekly status update"""
-        logger.info("Running weekly status update workflow...")
+    def run_weekly_stakeholder_discovery(self):
+        """Run weekly stakeholder discovery analysis"""
+        logger.info("Running weekly stakeholder discovery workflow...")
 
         try:
-            # TODO: Implement stakeholder agent
-            message = "📊 Weekly status update placeholder - Coming soon!"
-            messaging_client.send_status_update(message)
+            # Run discovery on recent notes
+            report = stakeholder_discovery_agent.analyze_recent_notes(
+                days=7,
+                report_title=f"Weekly Stakeholder Discovery - {datetime.now().strftime('%Y-%m-%d')}",
+            )
 
-            logger.info("Weekly status update completed")
+            logger.info(f"Stakeholder discovery completed")
+            logger.info(f"Report: {report.google_doc_url or 'Not saved'}")
+            logger.info(f"Stakeholders analyzed: {len(report.stakeholder_profiles)}")
 
         except Exception as e:
-            logger.error(f"Error in weekly status update: {e}")
+            logger.error(f"Error in stakeholder discovery: {e}")
 
     # ==================== Discovery Agent Jobs ====================
 
@@ -210,9 +201,7 @@ class PersonalOS:
 
         try:
             # TODO: Implement discovery agent
-            message = "💡 Feedback digest placeholder - Coming soon!"
-            messaging_client.send_dm(message)
-
+            logger.info("Feedback digest placeholder - Coming soon!")
             logger.info("Feedback digest completed")
 
         except Exception as e:
@@ -221,61 +210,89 @@ class PersonalOS:
     # ==================== Helper Methods ====================
 
     def _get_todays_calendar_events(self):
-        """Fetch today's calendar events"""
-        # TODO: Integrate with Google Calendar API
-        # Placeholder implementation
-        return [
-            {"time": "9:00 AM", "title": "Team Standup", "duration": "15 min"},
-            {"time": "2:00 PM", "title": "Product Review", "duration": "1 hour"},
-        ]
+        """Fetch today's calendar events from Google Calendar"""
+        try:
+            from utils.google.calendar_client import calendar_client
+
+            events = calendar_client.get_todays_events()
+            formatted_events = []
+
+            for event in events:
+                start = event.get("start", {})
+                start_time = start.get("dateTime", start.get("date", ""))
+
+                formatted_events.append({
+                    "time": start_time,
+                    "title": event.get("summary", "No title"),
+                    "duration": "See calendar",
+                })
+
+            return formatted_events
+
+        except Exception as e:
+            logger.warning(f"Could not fetch calendar events: {e}")
+            # Return placeholder data
+            return [
+                {"time": "9:00 AM", "title": "Team Standup", "duration": "15 min"},
+                {"time": "2:00 PM", "title": "Product Review", "duration": "1 hour"},
+            ]
 
     def _get_open_tasks(self):
-        """Fetch open tasks from task management system"""
-        # TODO: Integrate with Notion/Jira/etc
-        # Placeholder implementation
-        return [
-            {
-                "title": "Complete PRD for Feature X",
-                "deadline": "Friday",
-                "priority": "High",
-                "estimate": "4 hours"
-            },
-            {
-                "title": "Review design mockups",
-                "deadline": "Today",
-                "priority": "High",
-                "estimate": "1 hour"
-            },
-        ]
+        """Fetch open tasks from Google Tasks"""
+        try:
+            from utils.google.tasks_client import tasks_client
 
-    def _send_error_alert(self, workflow_name: str, error_message: str):
-        """Send an error alert to Slack"""
-        messaging_client.send_alert(
-            title=f"Error in {workflow_name}",
-            message=f"An error occurred:\n```{error_message}```",
-            severity="error"
-        )
+            tasks = tasks_client.get_pending_tasks()
+            formatted_tasks = []
+
+            for task in tasks:
+                formatted_tasks.append({
+                    "title": task.get("title", "Untitled"),
+                    "deadline": task.get("due", "No deadline"),
+                    "priority": "Medium",
+                    "estimate": "Unknown",
+                })
+
+            return formatted_tasks
+
+        except Exception as e:
+            logger.warning(f"Could not fetch tasks: {e}")
+            # Return placeholder data
+            return [
+                {
+                    "title": "Complete PRD for Feature X",
+                    "deadline": "Friday",
+                    "priority": "High",
+                    "estimate": "4 hours"
+                },
+                {
+                    "title": "Review design mockups",
+                    "deadline": "Today",
+                    "priority": "High",
+                    "estimate": "1 hour"
+                },
+            ]
 
     def run(self):
         """Start the Personal OS automation loop"""
         logger.info("Personal OS is now running...")
         logger.info("Press Ctrl+C to stop")
 
-        # Send startup message
+        # Log startup
         startup_message = f"""
-🚀 *Personal OS Started*
+Personal OS Started
 
 Enabled agents:
-{'✅ Execution Agent' if settings.enable_execution_agent else '❌ Execution Agent'}
-{'✅ Strategy Agent' if settings.enable_strategy_agent else '❌ Strategy Agent'}
-{'✅ Discovery Agent' if settings.enable_discovery_agent else '❌ Discovery Agent'}
-{'✅ Stakeholder Agent' if settings.enable_stakeholder_agent else '❌ Stakeholder Agent'}
+{'- Execution Agent' if settings.enable_execution_agent else ''}
+{'- Strategy Agent' if settings.enable_strategy_agent else ''}
+{'- Discovery Agent' if settings.enable_discovery_agent else ''}
+{'- Stakeholder Agent' if settings.enable_stakeholder_agent else ''}
 
 Next scheduled run: {schedule.next_run()}
 
-{'⚠️ DRY RUN MODE - No actual messages will be sent' if settings.dry_run else ''}
+{'DRY RUN MODE - No actual changes will be made' if settings.dry_run else ''}
 """
-        messaging_client.send_dm(startup_message)
+        logger.info(startup_message)
 
         try:
             while True:
@@ -284,24 +301,23 @@ Next scheduled run: {schedule.next_run()}
 
         except KeyboardInterrupt:
             logger.info("Personal OS stopped by user")
-            messaging_client.send_dm("🛑 Personal OS stopped")
 
         except Exception as e:
             logger.error(f"Critical error in Personal OS: {e}")
-            self._send_error_alert("Personal OS", str(e))
             raise
 
 
 def main():
     """Main entry point"""
     print("""
-╔═══════════════════════════════════════════════════════════╗
-║                                                           ║
-║              PERSONAL OS - AUTOMATION SYSTEM              ║
-║                                                           ║
-║   Automating your product management workflows           ║
-║                                                           ║
-╚═══════════════════════════════════════════════════════════╝
+================================================================
+
+              PERSONAL OS - AUTOMATION SYSTEM
+
+   Automating your product management workflows
+   Powered by Google Workspace + AI
+
+================================================================
 """)
 
     try:
@@ -310,7 +326,7 @@ def main():
 
     except Exception as e:
         logger.error(f"Failed to start Personal OS: {e}")
-        print(f"\n❌ Error: {e}")
+        print(f"\nError: {e}")
         print("\nPlease check your configuration and try again.")
         exit(1)
 

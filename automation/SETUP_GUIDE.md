@@ -4,22 +4,21 @@ This guide will walk you through setting up your Personal OS automation system s
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before you begin, you'll need:
 
 1. **Python 3.9 or higher** installed
-2. **Slack workspace** with admin access (to create bot)
+2. **Google account** with access to Google Workspace (Drive, Docs, Calendar, etc.)
 3. **AI API key** (Anthropic Claude or OpenAI)
 4. Basic command line knowledge
 
 Optional (for full integration):
-- Google Calendar account
 - Task management tool account (Notion, Jira, etc.)
 
 ---
 
-## 🚀 Step-by-Step Setup
+## Step-by-Step Setup
 
 ### Step 1: Install Python Dependencies
 
@@ -43,42 +42,68 @@ pip install -r requirements.txt
 
 ---
 
-### Step 2: Set Up Slack Bot
+### Step 2: Set Up Google Cloud Project
 
-#### 2.1 Create a Slack App
+#### 2.1 Create a Project
 
-1. Go to https://api.slack.com/apps
-2. Click **"Create New App"**
-3. Choose **"From scratch"**
-4. App Name: `Personal OS Bot`
-5. Workspace: Select your workspace
-6. Click **"Create App"**
+1. Go to https://console.cloud.google.com/
+2. Click **"Select a project"** dropdown at the top
+3. Click **"New Project"**
+4. Project name: `Personal OS`
+5. Click **"Create"**
+6. Wait for the project to be created
 
-#### 2.2 Configure Bot Permissions
+#### 2.2 Enable APIs
 
-1. In your app settings, go to **"OAuth & Permissions"**
-2. Scroll to **"Scopes"** → **"Bot Token Scopes"**
-3. Add these scopes:
-   - `chat:write` - Send messages
-   - `users:read` - Read user information
-   - `channels:read` - List channels
-   - `im:write` - Send DMs
+1. Make sure your new project is selected
+2. Go to **"APIs & Services"** > **"Enable APIs and Services"**
+3. Search for and enable each of these APIs:
+   - **Google Drive API** - Click "Enable"
+   - **Google Docs API** - Click "Enable"
+   - **Google Sheets API** - Click "Enable"
+   - **Google Slides API** - Click "Enable"
+   - **Google Calendar API** - Click "Enable"
+   - **Tasks API** - Click "Enable"
 
-4. Scroll up and click **"Install to Workspace"**
-5. Click **"Allow"**
-6. **Copy the Bot User OAuth Token** (starts with `xoxb-`)
-   - Save this - you'll need it in Step 3
+#### 2.3 Configure OAuth Consent Screen
 
-#### 2.3 Get Your Slack User ID
+1. Go to **"APIs & Services"** > **"OAuth consent screen"**
+2. Choose **"External"** (or "Internal" if using Google Workspace)
+3. Click **"Create"**
+4. Fill in:
+   - App name: `Personal OS`
+   - User support email: Your email
+   - Developer contact: Your email
+5. Click **"Save and Continue"**
+6. On Scopes page, click **"Add or Remove Scopes"**
+7. Add these scopes:
+   - `https://www.googleapis.com/auth/drive`
+   - `https://www.googleapis.com/auth/documents`
+   - `https://www.googleapis.com/auth/spreadsheets`
+   - `https://www.googleapis.com/auth/presentations`
+   - `https://www.googleapis.com/auth/calendar`
+   - `https://www.googleapis.com/auth/tasks`
+8. Click **"Update"** then **"Save and Continue"**
+9. Add your email as a test user
+10. Click **"Save and Continue"**
 
-1. In Slack, click your profile picture → **"Profile"**
-2. Click the **⋯ (three dots)** → **"Copy member ID"**
-   - Save this - you'll need it in Step 3
+#### 2.4 Create OAuth Credentials
 
-#### 2.4 Create a Channel (Optional)
+1. Go to **"APIs & Services"** > **"Credentials"**
+2. Click **"Create Credentials"** > **"OAuth client ID"**
+3. Application type: **"Desktop app"**
+4. Name: `Personal OS Desktop`
+5. Click **"Create"**
+6. Click **"Download JSON"**
+7. Save the file as `credentials/google_credentials.json` in your automation directory
 
-1. In Slack, create a new channel: `#personal-os-updates`
-2. Invite your bot: Type `/invite @Personal OS Bot` in the channel
+```bash
+# Create credentials directory
+mkdir -p credentials
+
+# Move your downloaded file
+mv ~/Downloads/client_secret_*.json credentials/google_credentials.json
+```
 
 ---
 
@@ -124,9 +149,12 @@ OPENAI_API_KEY=sk-your-key-here
 # Which provider to use
 AI_PROVIDER=anthropic  # or "openai"
 
-# Slack Configuration
-SLACK_BOT_TOKEN=xoxb-your-bot-token-here
-SLACK_USER_ID=U0123456789  # Your user ID from Step 2.3
+# Google Workspace Configuration
+GOOGLE_CREDENTIALS_FILE=credentials/google_credentials.json
+GOOGLE_CALENDAR_ID=primary  # or your-email@gmail.com
+
+# Optional: Specify a folder for stakeholder documents
+# GOOGLE_DRIVE_FOLDER_ID=your-folder-id
 
 # Personal Context
 USER_NAME=Your Name
@@ -155,7 +183,7 @@ Personal OS Configuration
 ==================================================
 AI Provider: anthropic
 AI Model: claude-sonnet-4-5-20250929
-Task System: notion
+Task System: google_tasks
 Timezone: America/New_York
 User: Your Name (Product Manager)
 Dry Run: False
@@ -167,14 +195,33 @@ Enabled Agents:
   - Stakeholder: True
 
 ==================================================
-✅ Configuration validated successfully
+Configuration validated successfully
 ```
 
 If you see errors, double-check your `.env` file.
 
 ---
 
-### Step 6: Test AI Client
+### Step 6: Authenticate with Google
+
+The first time you run Personal OS, it will open a browser for Google authentication:
+
+```bash
+python main.py
+```
+
+1. A browser window will open
+2. Select your Google account
+3. You may see a warning: "This app isn't verified" - click **"Advanced"** > **"Go to Personal OS"**
+4. Review permissions and click **"Allow"**
+5. Close the browser tab when prompted
+6. A token file will be saved to `credentials/token.json`
+
+**Expected output**: Personal OS starts running
+
+---
+
+### Step 7: Test AI Client
 
 Run the AI client test:
 
@@ -189,40 +236,37 @@ If this fails, check your AI API key.
 
 ---
 
-### Step 7: Test Slack Client
+### Step 8: Test Google Integration
 
-Run the Slack client test:
+Test the Google clients:
 
 ```bash
-cd utils
-python slack_client.py
+# Test Drive search
+python -c "from utils.google import GoogleDriveClient; c = GoogleDriveClient(); print('Drive OK')"
+
+# Test Calendar
+python -c "from utils.google import GoogleCalendarClient; c = GoogleCalendarClient(); print(c.get_todays_events())"
 ```
 
-**Expected output**: A test message in your Slack DMs
-
-If you don't receive a message:
-1. Check your Slack bot token
-2. Make sure the bot is installed in your workspace
-3. Verify your user ID is correct
+**Expected output**: Empty list or your today's events
 
 ---
 
-### Step 8: Test Execution Agent
+### Step 9: Test Stakeholder Discovery Agent
 
-Run the execution agent test:
+Run the stakeholder discovery agent:
 
 ```bash
-cd agents
-python execution_agent.py
+python agents/stakeholder_discovery_agent.py
 ```
 
-**Expected output**: A generated daily plan in your terminal
+**Expected output**: Agent searches for documents and generates a report
 
 ---
 
-### Step 9: Run Personal OS (Dry Run Mode)
+### Step 10: Run Personal OS (Dry Run Mode)
 
-First, let's run in dry run mode (won't send actual messages):
+First, let's run in dry run mode (won't create actual documents):
 
 1. Edit `.env` and set:
    ```bash
@@ -236,13 +280,13 @@ First, let's run in dry run mode (won't send actual messages):
 
 **Expected output**:
 ```
-╔═══════════════════════════════════════════════════════════╗
-║                                                           ║
-║              PERSONAL OS - AUTOMATION SYSTEM              ║
-║                                                           ║
-║   Automating your product management workflows           ║
-║                                                           ║
-╚═══════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║              PERSONAL OS - AUTOMATION SYSTEM                  ║
+║                                                               ║
+║   Automating your product management workflows                ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
 
 Personal OS is now running...
 Press Ctrl+C to stop
@@ -256,7 +300,7 @@ Press Ctrl+C to stop
 
 ---
 
-### Step 10: Run Personal OS (Live Mode)
+### Step 11: Run Personal OS (Live Mode)
 
 Once you're confident everything works:
 
@@ -270,16 +314,15 @@ Once you're confident everything works:
    python main.py
    ```
 
-3. You should receive a startup message in Slack!
-
-4. **Let it run!** The system will:
-   - Send daily plan at 8:00 AM
-   - Send progress check at 12:30 PM
-   - Send daily summary at 5:30 PM
+3. **Let it run!** The system will:
+   - Generate daily plan at 8:00 AM (saved to Google Docs)
+   - Check progress at 12:30 PM
+   - Summarize your day at 5:30 PM
+   - Run stakeholder discovery on Fridays
 
 ---
 
-## ⏰ Scheduled Workflows
+## Scheduled Workflows
 
 Your Personal OS will now run these workflows automatically:
 
@@ -295,11 +338,11 @@ Your Personal OS will now run these workflows automatically:
 
 | When | Workflow | What It Does |
 |------|----------|--------------|
-| Friday 3:00 PM | Weekly Status Update | Generates status update for stakeholders |
+| Friday 3:00 PM | Stakeholder Discovery | Analyzes meeting notes and builds stakeholder profiles |
 
 ---
 
-## 🎨 Customization
+## Customization
 
 ### Change Schedule Times
 
@@ -320,14 +363,6 @@ ENABLE_DISCOVERY_AGENT=true
 ENABLE_STAKEHOLDER_AGENT=true
 ```
 
-### Change Slack Channels
-
-Edit `.env`:
-```bash
-SLACK_CHANNEL_DAILY=#my-daily-updates
-SLACK_CHANNEL_WEEKLY=#weekly-summaries
-```
-
 ### Change Your Timezone
 
 Edit `.env`:
@@ -341,7 +376,7 @@ TIMEZONE=America/Los_Angeles  # PST
 
 ---
 
-## 🔧 Advanced: Integrate with Task Management
+## Advanced: Task Management Integration
 
 ### Option A: Notion Integration
 
@@ -380,54 +415,27 @@ TIMEZONE=America/Los_Angeles  # PST
 
 ---
 
-## 📱 Advanced: Google Calendar Integration
-
-1. Enable Google Calendar API:
-   - Go to https://console.cloud.google.com/
-   - Create a new project
-   - Enable Google Calendar API
-   - Create credentials (OAuth 2.0)
-   - Download credentials JSON
-
-2. Save credentials:
-   ```bash
-   mkdir credentials
-   # Move your downloaded JSON file to:
-   # credentials/google_calendar_credentials.json
-   ```
-
-3. Edit `.env`:
-   ```bash
-   GOOGLE_CALENDAR_CREDENTIALS=credentials/google_calendar_credentials.json
-   GOOGLE_CALENDAR_ID=your-email@gmail.com
-   ```
-
----
-
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Problem: "Configuration validation failed"
 
 **Solution**: Check your `.env` file. Make sure:
 - AI API key is correct
-- Slack bot token starts with `xoxb-`
-- Slack user ID starts with `U`
+- Google credentials file exists at the configured path
 
-### Problem: "Slack API error: invalid_auth"
-
-**Solution**: Your Slack bot token is invalid or expired
-1. Go to https://api.slack.com/apps
-2. Select your app
-3. Go to "OAuth & Permissions"
-4. Copy the Bot User OAuth Token again
-5. Update `.env` file
-
-### Problem: No messages received
+### Problem: "Google API error: invalid credentials"
 
 **Solution**:
-1. Check if bot is installed: Look for `@Personal OS Bot` in your workspace
-2. Check DRY_RUN setting in `.env` (should be `false`)
-3. Check logs in `logs/personal_os.log`
+1. Delete `credentials/token.json`
+2. Run `python main.py` again
+3. Complete the OAuth flow in your browser
+
+### Problem: "Access Denied" from Google
+
+**Solution**:
+1. Make sure you added your email as a test user in OAuth consent screen
+2. Verify all APIs are enabled
+3. Check the credentials file is valid JSON
 
 ### Problem: "Module not found"
 
@@ -437,26 +445,33 @@ source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 ```
 
+### Problem: No reports generated
+
+**Solution**:
+1. Check if `DRY_RUN=false` in `.env`
+2. Check logs in `logs/personal_os.log`
+3. Verify Google credentials are working
+
 ---
 
-## 🎯 Next Steps
+## Next Steps
 
 ### Week 1: Getting Started
-1. ✅ Complete this setup
-2. ✅ Receive your first daily plan
-3. ✅ Review and provide feedback (mental notes)
-4. ✅ Adjust schedule times if needed
+1. Complete this setup
+2. Run your first stakeholder discovery
+3. Review the generated report
+4. Adjust schedule times if needed
 
 ### Week 2: Customize
 1. Fine-tune your strategic priorities
 2. Customize agent prompts (in `agents/` files)
-3. Add your actual tasks (integrate with task system)
-4. Connect Google Calendar
+3. Add more documents to your Drive folder
+4. Review stakeholder profiles
 
 ### Week 3: Expand
 1. Enable other agents (Strategy, Discovery)
 2. Add custom workflows
-3. Integrate with more tools
+3. Integrate with Notion/Jira
 4. Share insights with team
 
 ### Month 2: Advanced
@@ -467,7 +482,7 @@ pip install -r requirements.txt
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 ### File Structure
 ```
@@ -477,11 +492,17 @@ automation/
 ├── requirements.txt       # Dependencies
 ├── .env                   # Your secrets (don't commit!)
 ├── .env.example          # Template
+├── credentials/          # Google credentials (don't commit!)
+│   ├── google_credentials.json
+│   └── token.json
 ├── agents/
-│   └── execution_agent.py
+│   ├── execution_agent.py
+│   └── stakeholder_discovery_agent.py
+├── skills/               # Reusable skills
+├── models/               # Data models
 ├── utils/
 │   ├── ai_client.py
-│   └── slack_client.py
+│   └── google/          # Google Workspace clients
 └── logs/
     └── personal_os.log    # Application logs
 ```
@@ -497,6 +518,7 @@ python config.py
 
 # Test specific agent
 python agents/execution_agent.py
+python agents/stakeholder_discovery_agent.py
 
 # View logs (live)
 tail -f logs/personal_os.log
@@ -507,7 +529,7 @@ Ctrl+C
 
 ---
 
-## 🆘 Getting Help
+## Getting Help
 
 If you run into issues:
 
@@ -518,23 +540,9 @@ If you run into issues:
 
 ---
 
-## 🎉 Success!
+## Success!
 
-Once you see this in Slack, you're all set:
-
-```
-🚀 Personal OS Started
-
-Enabled agents:
-✅ Execution Agent
-✅ Strategy Agent
-✅ Discovery Agent
-✅ Stakeholder Agent
-
-Next scheduled run: 2026-01-02 08:00:00
-```
-
-Your Personal OS is now running and will help you stay organized and productive every day!
+Once everything is working, you'll see reports generated in Google Docs and tasks created in Google Tasks. Your Personal OS is now running and will help you stay organized and productive every day!
 
 ---
 

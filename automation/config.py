@@ -22,29 +22,22 @@ class Settings(BaseSettings):
     anthropic_api_key: Optional[str] = None
     openai_api_key: Optional[str] = None
 
-    # Slack Configuration
-    slack_bot_token: Optional[str] = None
-    slack_app_token: Optional[str] = None
-    slack_signing_secret: Optional[str] = None
-    slack_user_id: Optional[str] = None
-    slack_channel_daily: str = "#personal-os-updates"
-    slack_channel_weekly: str = "#weekly-summary"
+    # Google Workspace Configuration
+    google_credentials_path: str = "credentials/google_credentials.json"
+    google_token_path: str = "credentials/google_token.json"
+    google_service_account_path: Optional[str] = None
 
-    # Lark Configuration
-    lark_app_id: Optional[str] = None
-    lark_app_secret: Optional[str] = None
-    lark_user_id: Optional[str] = None
-    lark_chat_id: Optional[str] = None
-
-    # Messaging Platform Preference
-    messaging_platform: str = Field(default="slack", description="slack, lark, or both")
-
-    # Calendar Configuration
-    google_calendar_credentials: str = "credentials/google_calendar_credentials.json"
+    # Google Calendar
     google_calendar_id: Optional[str] = None
 
-    # Task Management Configuration
-    task_system: str = Field(default="notion", description="notion, jira, asana, or linear")
+    # Google Drive
+    google_drive_discovery_folder: Optional[str] = None  # Folder for stakeholder discovery docs
+
+    # Google Tasks
+    google_tasks_list_id: Optional[str] = None  # Default task list
+
+    # Task Management Configuration (external systems)
+    task_system: str = Field(default="google_tasks", description="google_tasks, notion, jira, asana, or linear")
 
     # Notion
     notion_api_key: Optional[str] = None
@@ -78,6 +71,7 @@ class Settings(BaseSettings):
     user_name: str = "User"
     user_role: str = "Product Manager"
     company_name: str = "Company"
+    user_email: Optional[str] = None
     current_okrs: str = ""
     strategic_priorities: str = ""
 
@@ -118,23 +112,16 @@ class Settings(BaseSettings):
             return []
         return [p.strip() for p in self.strategic_priorities.split(",")]
 
-    def validate_slack_config(self) -> bool:
-        """Check if Slack is properly configured"""
-        return bool(self.slack_bot_token and self.slack_user_id)
+    def validate_google_config(self) -> bool:
+        """Check if Google Workspace is properly configured"""
+        # Check if credentials file exists or service account is configured
+        creds_path = Path(self.base_dir) / self.google_credentials_path
+        service_account_path = self.google_service_account_path
 
-    def validate_lark_config(self) -> bool:
-        """Check if Lark is properly configured"""
-        return bool(self.lark_app_id and self.lark_app_secret and self.lark_user_id)
+        has_oauth = creds_path.exists()
+        has_service_account = service_account_path and Path(service_account_path).exists()
 
-    def validate_messaging_config(self) -> bool:
-        """Check if at least one messaging platform is configured"""
-        if self.messaging_platform == "slack":
-            return self.validate_slack_config()
-        elif self.messaging_platform == "lark":
-            return self.validate_lark_config()
-        elif self.messaging_platform == "both":
-            return self.validate_slack_config() or self.validate_lark_config()
-        return False
+        return has_oauth or has_service_account
 
     def validate_ai_config(self) -> bool:
         """Check if AI provider is properly configured"""
@@ -146,7 +133,9 @@ class Settings(BaseSettings):
 
     def validate_task_system_config(self) -> bool:
         """Check if task management system is properly configured"""
-        if self.task_system == "notion":
+        if self.task_system == "google_tasks":
+            return self.validate_google_config()
+        elif self.task_system == "notion":
             return bool(self.notion_api_key and self.notion_database_id)
         elif self.task_system == "jira":
             return bool(self.jira_url and self.jira_email and self.jira_api_token)
@@ -169,15 +158,8 @@ def validate_configuration():
     if not settings.validate_ai_config():
         errors.append(f"AI provider '{settings.ai_provider}' is not properly configured")
 
-    if not settings.validate_messaging_config():
-        errors.append(f"Messaging platform '{settings.messaging_platform}' is not properly configured")
-
-    # Warnings for optional configurations
-    if settings.messaging_platform in ["slack", "both"] and not settings.validate_slack_config():
-        warnings.append("Slack configuration incomplete - Slack messaging will be disabled")
-
-    if settings.messaging_platform in ["lark", "both"] and not settings.validate_lark_config():
-        warnings.append("Lark configuration incomplete - Lark messaging will be disabled")
+    if not settings.validate_google_config():
+        warnings.append("Google Workspace not configured - some features will be limited")
 
     if not settings.validate_task_system_config():
         warnings.append(f"Task system '{settings.task_system}' is not properly configured - using placeholder data")
@@ -185,15 +167,15 @@ def validate_configuration():
     if errors:
         print("Configuration Errors:")
         for error in errors:
-            print(f"  ❌ {error}")
+            print(f"  - {error}")
         return False
 
     if warnings:
         print("\nConfiguration Warnings:")
         for warning in warnings:
-            print(f"  ⚠️  {warning}")
+            print(f"  - {warning}")
 
-    print("\n✅ Configuration validated successfully")
+    print("\nConfiguration validated successfully")
     return True
 
 
