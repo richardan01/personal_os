@@ -6,146 +6,85 @@
 
 ## 🚀 Quick Start
 
-### **New here? Start with one of these:**
+### **Start here:**
 
-1. **[QUICK_START.md](./QUICK_START.md)** ⭐ - 30-minute setup guide for automation
-2. **[INDEX.md](./INDEX.md)** - Complete navigation and documentation hub
-3. **[agents/README.md](./agents/README.md)** - Use agent templates manually (no setup)
+1. **[Claude CLI Commands](./.claude/commands/)** ⭐ - Run agents directly via `/command` in your Claude desktop app.
+2. **[QUICK_START.md](./QUICK_START.md)** - Setup guide for full Python automation (Slack/Notion integration).
 
 ---
 
 ## 📦 What's Inside
 
-### ✅ **4 AI Agent Templates** with 20+ ready-to-use prompts
-- **Strategy Agent** - OKR planning, competitive analysis, strategic alignment
-- **Discovery Agent** - User interviews, feedback analysis, feature requests
-- **Execution Agent** - Daily planning, progress tracking, summaries
-- **Stakeholder Agent** - Meeting prep, status updates, communication
+### ✅ **Claude CLI Integration**
 
-### ✅ **Python Automation System** that runs 24/7
+- Use `/daily-plan`, `/daily-summary`, `/discovery`, and more directly in your chat.
+- Pre-configured for Product Management workflows.
+
+### ✅ **Python Automation System** (Optional)
+
 - 📋 Daily plan at 8:00 AM
 - 📊 Progress check at 12:30 PM
 - 🌟 Daily summary at 5:30 PM
 - All delivered to Slack automatically!
 
-### ✅ **Complete Documentation**
-- Setup guides, architecture docs, troubleshooting, and more
-
 ---
 
 ## 🎯 Two Ways to Use This
 
-### Option 1: Manual Mode (5 minutes)
-Copy any prompt from the agent templates and use with ChatGPT or Claude.
-- No setup required
-- Start immediately
-- Perfect for testing
+### Option 1: Claude CLI Mode (Instant)
 
-**Start here:** [agents/README.md](./agents/README.md)
+Use the powered-up commands directly in your Claude Desktop app.
+
+- No complex setup required.
+- Human-in-the-loop control.
+- **Start here:** [./.claude/commands/](./.claude/commands/)
 
 ### Option 2: Full Automation (30 minutes)
-Set up automated workflows that run on schedule.
-- Daily automated updates
-- Hands-free operation
-- Maximum productivity
 
-**Start here:** [QUICK_START.md](./QUICK_START.md)
+Set up automated background workflows that run on schedule and push to Slack/Notion.
+
+- Hands-free operation.
+- Multi-tool integration.
+- **Start here:** [QUICK_START.md](./QUICK_START.md)
 
 ---
 
 ## 📁 File Structure
 
 ```
-Productivity/
+Personal-OS/
 ├── README.md (this file)
-├── QUICK_START.md          # 30-min automation setup
-├── INDEX.md                # Complete navigation
-├── personal-os-design.md   # System design
+├── QUICK_START.md          # Automation setup guide
+├── personal-os-design.md   # System design & architecture
 │
-├── agents/                 # Agent templates (manual)
-│   ├── strategy-agent.md
-│   ├── discovery-agent.md
-│   ├── execution-agent.md
-│   └── stakeholder-agent.md
+├── .claude/                # Claude Desktop Integration
+│   └── commands/           # Slash commands (/daily-plan, etc.)
 │
-└── automation/             # Python automation
+└── automation/             # Python automation engine
     ├── main.py
     ├── config.py
-    ├── requirements.txt
-    └── ... (full system)
+    └── requirements.txt
 ```
 
 ---
 
-## 🎉 Get Started Now
+## 🚀 How to Execute Workflows
 
-1. **Explore:** Open [INDEX.md](./INDEX.md) for complete documentation
-2. **Quick test:** Try a manual prompt from [agents/README.md](./agents/README.md)
-3. **Full setup:** Follow [QUICK_START.md](./QUICK_START.md) for automation
+### Via Claude CLI (Recommended)
 
----
+Simply type the slash command in your Claude chat:
 
-## 🚀 How to Start & Execute Workflows
+- `/daily-plan` - Plan your day
+- `/daily-summary` - Wrap up and prepare for tomorrow
+- `/discovery` - Analyze user feedback
+- `/strategy-check` - Align with OKRs
 
-### Quick Start (5 minutes)
-1. Navigate to the automation folder:
-   ```bash
-   cd automation
-   ```
+### Via Python Automation
 
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Configure environment:
-   ```bash
-   # Copy template
-   cp .env.example .env
-
-   # Edit .env with your API keys
-   # Required: ANTHROPIC_API_KEY, SLACK_BOT_TOKEN, SLACK_USER_ID
-   ```
-
-4. Run the system:
-   ```bash
-   # Test mode (no actual messages)
-   python main.py
-
-   # Or on Windows, double-click:
-   run.bat
-   ```
-
-### Executing Workflows
-
-**Option 1: Automated (Default)**
-The system runs automatically based on schedule:
-- 8:00 AM - Daily plan
-- 12:30 PM - Progress check
-- 5:30 PM - Daily summary
-
-Just keep `python main.py` running in the background.
-
-**Option 2: Manual Execution**
-Run individual agents on-demand:
-```bash
-# Execute daily planning workflow
-python automation/agents/execution_agent.py
-
-# Test individual components
-python automation/utils/ai_client.py
-python automation/utils/slack_client.py
-```
-
-**Option 3: Custom Schedule**
-Edit `.env` to customize timing:
-```bash
-EXECUTION_AGENT_MORNING_TIME=09:00
-EXECUTION_AGENT_MIDDAY_TIME=13:00
-EXECUTION_AGENT_EVENING_TIME=18:00
-```
-
-For detailed instructions, see [QUICK_START.md](./QUICK_START.md)
+1. Navigate to the automation folder: `cd automation`
+2. Install dependencies: `pip install -r requirements.txt`
+3. Configure your API keys in `.env`
+4. Run: `python main.py`
 
 ---
 
