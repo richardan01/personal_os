@@ -10,6 +10,8 @@ from .discovery_agent import discovery_agent, DiscoveryAgent
 from .planning_agent import planning_agent, PlanningAgent
 from .stakeholder_agent import stakeholder_agent, StakeholderAgent
 from .analytics_agent import analytics_agent, AnalyticsAgent
+from .documentation_agent import documentation_agent, DocumentationAgent
+from .learning_agent import learning_agent, LearningAgent
 
 __all__ = [
     # Base classes
@@ -22,6 +24,8 @@ __all__ = [
     "PlanningAgent",
     "StakeholderAgent",
     "AnalyticsAgent",
+    "DocumentationAgent",
+    "LearningAgent",
     # Global instances
     "execution_agent",
     "strategy_agent",
@@ -29,4 +33,6 @@ __all__ = [
     "planning_agent",
     "stakeholder_agent",
     "analytics_agent",
+    "documentation_agent",
+    "learning_agent",
 ]

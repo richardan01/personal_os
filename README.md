@@ -82,6 +82,11 @@ Run `/personal-os` to see all available commands, or use these directly:
 |---------|-------------|-------|
 | `/stakeholder-update` | Status reports | @stakeholder-agent |
 
+### Configuration
+| Command | Description | Agent |
+|---------|-------------|-------|
+| `/update-context` | Update OKRs, priorities, and user profile | Interactive |
+
 ---
 
 ## Agents
@@ -185,6 +190,16 @@ Setup:
 2. `pip install -r requirements.txt`
 3. Configure API keys in `.env`
 4. `python main.py`
+
+---
+
+## Reference Library
+
+See `.claude/REFERENCE.md` for:
+- When to use skills vs agents
+- Complete command and agent listing
+- Decision matrix for common scenarios
+- Quick examples
 
 ---
 

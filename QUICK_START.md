@@ -122,12 +122,12 @@ If you see version 3.9 or higher, you're good! Skip to Step 2.
 
 **Windows:**
 1. Open File Explorer
-2. Navigate to `C:\Users\RICHIE\Documents\Productivity\automation`
+2. Navigate to `C:\Users\RICHIE\Documents\personal_os\automation`
 3. Click in the address bar and type `cmd`, press Enter
 
 **Mac/Linux:**
 ```bash
-cd ~/Documents/Productivity/automation
+cd ~/Documents/personal_os/automation
 ```
 
 ---
@@ -576,7 +576,7 @@ Use your computer's task scheduler:
 | `SETUP_GUIDE.md` | Detailed setup instructions |
 | `README.md` | System overview and features |
 | `ARCHITECTURE.md` | How everything works |
-| `agents/README.md` | How to use agent templates |
+| `automation/AUTOMATION_README.md` | Python automation details |
 | Individual agent files | Specific agent prompts |
 
 ---

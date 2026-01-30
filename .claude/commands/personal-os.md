@@ -14,6 +14,7 @@ Based on time of day:
 ### Execution
 | Command | Description |
 |---------|-------------|
+| `/today` | Quick daily overview (calendar + tasks) |
 | `/daily-plan` | Generate morning daily plan |
 | `/progress-check` | Mid-day progress assessment |
 | `/daily-summary` | End-of-day summary |
@@ -33,6 +34,13 @@ Based on time of day:
 | Command | Description |
 |---------|-------------|
 | `/stakeholder-update` | Status reports for any audience |
+
+### Configuration
+| Command | Description |
+|---------|-------------|
+| `/update-context` | Update your OKRs, priorities, and context interactively |
+| `/configure-google-workspace` | Set up Google Workspace integration (Drive, Docs, Sheets, Slides, Calendar, Tasks) |
+| `/configure-microsoft-teams` | Set up Microsoft 365 integration (Teams, OneDrive, Outlook, Office docs) |
 
 ## Agents
 

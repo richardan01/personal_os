@@ -9,7 +9,13 @@
       "Bash(git rm:*)",
       "Bash(git add:*)",
       "Bash(tree:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)",
+      "Bash(dir /s \"C:\\\\Users\\\\RICHIE\\\\Documents\\\\personal_os\")",
+      "Bash(where:*)",
+      "Bash(dir \"C:\\\\Users\\\\RICHIE\\\\Documents\\\\personal_os\\\\.claude\\\\skills\\\\config\")",
+      "Bash(dir \"C:\\\\Users\\\\RICHIE\\\\Documents\\\\personal_os\\\\.claude\\\\commands\")"
     ]
   }
 }

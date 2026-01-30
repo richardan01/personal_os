@@ -14,6 +14,8 @@ from agents.discovery_agent import discovery_agent
 from agents.planning_agent import planning_agent
 from agents.stakeholder_agent import stakeholder_agent
 from agents.analytics_agent import analytics_agent
+from agents.documentation_agent import documentation_agent
+from agents.learning_agent import learning_agent
 from utils.messaging_client import messaging_client
 
 # Configure logging

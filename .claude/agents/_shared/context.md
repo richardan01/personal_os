@@ -12,13 +12,13 @@
 
 | Objective | Key Result | Target |
 |-----------|------------|--------|
-| Improve user activation | Activation rate increase | +25% |
+| Improve data quality | Customer data accuracy | 90% |
 | Launch feature X | Feature shipped and adopted | Q target |
 | Reduce customer churn | Churn rate decrease | -10% |
 
 ## Strategic Priorities
 
-1. **User activation** - Getting users to value quickly
+1. **Data quality** - Ensuring accurate, reliable customer data
 2. **Product quality** - Reliability and polish
 3. **Team efficiency** - Sustainable velocity
 
@@ -40,6 +40,14 @@
 
 ## Current Sprint Focus
 
-- Primary: User activation improvements
+- Primary: Data quality improvements
 - Secondary: Quality and bug fixes
 - Stretch: Tech debt reduction
+
+## Roadmap
+
+| Initiative | OKR | Timeline | Status |
+|------------|-----|----------|--------|
+| Improve customer data quality to 90% | Data quality | Current | In Progress |
+| Launch feature X | Feature X launch | Q target | Planned |
+| Churn reduction initiatives | Reduce churn | Ongoing | Planned |
